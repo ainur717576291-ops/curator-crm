@@ -142,6 +142,9 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
 .bnav-btn .bni{font-size:22px;line-height:1;}
 .bnav-btn.on{color:var(--blue-d);}
 .has-nav .content{padding-bottom:80px;}
+.pd{width:14px;height:14px;border-radius:50%;background:var(--gray-m);}
+.pd.filled{background:var(--blue);}
+.pin-key{padding:16px;border:1.5px solid var(--gray-m);border-radius:12px;background:#fff;font-family:inherit;font-size:18px;font-weight:700;cursor:pointer;}
 </style>
 </head>
 <body>
@@ -271,6 +274,32 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
 </div>
 </div>
 
+<!-- SHEET: PIN ENTRY -->
+<div class="backdrop" id="bd-pin">
+<div class="sheet">
+  <h3 id="pinTitle">🔐 Введите PIN</h3>
+  <p style="color:var(--muted);font-size:13px;margin-bottom:16px;" id="pinSubtitle">Для входа как Старший куратор</p>
+  <div style="display:flex;justify-content:center;gap:12px;margin-bottom:20px;" id="pinDots">
+    <div class="pd"></div><div class="pd"></div><div class="pd"></div><div class="pd"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:240px;margin:0 auto 16px;">
+    <button class="pin-key" onclick="pinKey('1')">1</button>
+    <button class="pin-key" onclick="pinKey('2')">2</button>
+    <button class="pin-key" onclick="pinKey('3')">3</button>
+    <button class="pin-key" onclick="pinKey('4')">4</button>
+    <button class="pin-key" onclick="pinKey('5')">5</button>
+    <button class="pin-key" onclick="pinKey('6')">6</button>
+    <button class="pin-key" onclick="pinKey('7')">7</button>
+    <button class="pin-key" onclick="pinKey('8')">8</button>
+    <button class="pin-key" onclick="pinKey('9')">9</button>
+    <div></div>
+    <button class="pin-key" onclick="pinKey('0')">0</button>
+    <button class="pin-key" onclick="pinBack()">⌫</button>
+  </div>
+  <button class="btn-ghost" onclick="closeSheet('bd-pin')">Отмена</button>
+</div>
+</div>
+
 <!-- SHEET: LOG CALL -->
 <div class="backdrop" id="bd-call" onclick="if(event.target===this)closeSheet('bd-call')">
 <div class="sheet">
@@ -291,6 +320,8 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
     <input id="newCuratorName" placeholder="Имя нового куратора" style="flex:1;padding:10px 12px;border:1.5px solid var(--gray-m);border-radius:10px;font-family:inherit;font-size:14px;outline:none;">
     <button onclick="addCurator()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-family:inherit;font-weight:700;cursor:pointer;">+</button>
   </div>
+  <hr style="border:none;border-top:1px solid var(--gray-m);margin:12px 0;">
+  <button onclick="changePIN()" style="width:100%;padding:10px;background:var(--gray-l);border:none;border-radius:10px;font-family:inherit;font-size:13px;cursor:pointer;">🔐 Изменить PIN</button>
   <button class="btn-ghost" onclick="closeSheet('bd-curators')">Закрыть</button>
 </div>
 </div>
@@ -366,11 +397,81 @@ function showScreen(id) {
 function closeSheet(id) { document.getElementById(id).classList.remove('show'); }
 function openSheet(id) { document.getElementById(id).classList.add('show'); }
 
-/* ===== ROLE / LOGIN ===== */
+/* ===== PIN ===== */
+let pinBuffer = '';
+let pinMode = 'check'; // 'check' | 'set' | 'confirm'
+let pinNew = '';
+
 function loginSenior() {
-  role = 'senior';
-  localStorage.setItem(ROLE_KEY, 'senior');
-  enterApp();
+  const storedPin = (window._cfg && window._cfg.pin) ? window._cfg.pin : '1234';
+  if (!window._cfg || !window._cfg.pin) {
+    // No PIN set yet — ask to create one
+    pinMode = 'set';
+    document.getElementById('pinTitle').textContent = '🔐 Создайте PIN';
+    document.getElementById('pinSubtitle').textContent = 'Придумайте 4-значный PIN для старшего куратора';
+  } else {
+    pinMode = 'check';
+    document.getElementById('pinTitle').textContent = '🔐 Введите PIN';
+    document.getElementById('pinSubtitle').textContent = 'Для входа как Старший куратор';
+  }
+  pinBuffer = '';
+  pinNew = '';
+  updatePinDots();
+  openSheet('bd-pin');
+}
+
+function pinKey(k) {
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += k;
+  updatePinDots();
+  if (pinBuffer.length === 4) setTimeout(checkPin, 150);
+}
+function pinBack() {
+  pinBuffer = pinBuffer.slice(0,-1);
+  updatePinDots();
+}
+function updatePinDots() {
+  document.querySelectorAll('.pd').forEach((d,i) => d.classList.toggle('filled', i < pinBuffer.length));
+}
+async function checkPin() {
+  const storedPin = (window._cfg && window._cfg.pin) ? window._cfg.pin : '1234';
+  if (pinMode === 'check') {
+    if (pinBuffer === storedPin) {
+      closeSheet('bd-pin');
+      role = 'senior';
+      localStorage.setItem(ROLE_KEY, 'senior');
+      enterApp();
+    } else {
+      pinBuffer = '';
+      updatePinDots();
+      document.getElementById('pinSubtitle').textContent = '❌ Неверный PIN, попробуй снова';
+      if (tg) tg.HapticFeedback.notificationOccurred('error');
+    }
+  } else if (pinMode === 'set') {
+    pinNew = pinBuffer;
+    pinBuffer = '';
+    pinMode = 'confirm';
+    document.getElementById('pinTitle').textContent = '🔐 Подтвердите PIN';
+    document.getElementById('pinSubtitle').textContent = 'Введите PIN ещё раз';
+    updatePinDots();
+  } else if (pinMode === 'confirm') {
+    if (pinBuffer === pinNew) {
+      if (!window._cfg) window._cfg = {};
+      window._cfg.pin = pinNew;
+      await saveConfig();
+      closeSheet('bd-pin');
+      role = 'senior';
+      localStorage.setItem(ROLE_KEY, 'senior');
+      enterApp();
+      toast('PIN установлен ✅');
+    } else {
+      pinBuffer = ''; pinNew = '';
+      pinMode = 'set';
+      document.getElementById('pinTitle').textContent = '🔐 Создайте PIN';
+      document.getElementById('pinSubtitle').textContent = '❌ Не совпадает. Попробуй снова';
+      updatePinDots();
+    }
+  }
 }
 function loginCurator(name) {
   role = name;
@@ -405,19 +506,23 @@ function navTo(tab) {
   }
 }
 
-/* ===== LOAD CONFIG (curators list) ===== */
+/* ===== LOAD CONFIG ===== */
 async function loadConfig() {
   try {
     const rows = await sbGet('students', `id=eq.${CONFIG_ID}&select=notes`);
     if (rows && rows[0]) {
-      const cfg = JSON.parse(rows[0].notes || '{}');
-      curators = cfg.curators || [];
+      window._cfg = JSON.parse(rows[0].notes || '{}');
+      curators = window._cfg.curators || [];
+    } else {
+      window._cfg = {}; curators = [];
     }
-  } catch(e) { curators = []; }
+  } catch(e) { window._cfg = {}; curators = []; }
 }
 
 async function saveConfig() {
-  const cfg = JSON.stringify({ curators });
+  if (!window._cfg) window._cfg = {};
+  window._cfg.curators = curators;
+  const cfg = JSON.stringify(window._cfg);
   try {
     const existing = await sbGet('students', `id=eq.${CONFIG_ID}&select=id`);
     if (existing && existing[0]) {
@@ -528,6 +633,18 @@ function renameCurator(idx) {
   curators[idx] = name;
   saveConfig().then(() => { renderCuratorMgmtList(); renderRoleScreen(); toast('Имя обновлено'); });
 }
+function changePIN() {
+  closeSheet('bd-curators');
+  setTimeout(() => {
+    pinMode = 'set';
+    pinBuffer = ''; pinNew = '';
+    document.getElementById('pinTitle').textContent = '🔐 Новый PIN';
+    document.getElementById('pinSubtitle').textContent = 'Придумайте новый 4-значный PIN';
+    updatePinDots();
+    openSheet('bd-pin');
+  }, 200);
+}
+
 function renderRoleScreen() {
   document.getElementById('curatorLoginList').innerHTML = curators.map(c =>
     `<button onclick="loginCurator('${c.replace(/'/g,"\\'")}') " style="width:100%;background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:14px;padding:14px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px;text-align:left;display:flex;align-items:center;gap:10px;">
