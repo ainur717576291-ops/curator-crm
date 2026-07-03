@@ -156,6 +156,9 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
     <div class="hdr-title" style="flex:1">📊 Дашборд</div>
     <button class="icon-btn icon-btn-ghost" onclick="renderDashboard()">↻</button>
   </div>
+  <div style="padding:10px 12px 0;">
+    <button onclick="exportCSV()" style="width:100%;padding:12px;background:var(--green-l);color:#15803D;border:1.5px solid var(--green);border-radius:11px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">📤 Скачать Excel (CSV)</button>
+  </div>
   <div class="content" id="dashContent"></div>
 </div>
 
@@ -254,6 +257,7 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
       <button data-s="done" onclick="setStatus('done')">✅ Завершил</button>
     </div>
   </div>
+  <div class="fld" id="freezeDateFld" style="display:none"><label>❄️ Дата заморозки</label><input id="f-freeze" type="date"></div>
   <div class="fld"><label>С чем пришёл на курс</label><textarea id="f-problem" placeholder="Запрос, жалобы..."></textarea></div>
   <div class="fld"><label>Текущий этап</label><input id="f-progress" placeholder="Модуль 3, урок 2"></div>
   <div class="fld"><label>Результаты</label><textarea id="f-results" placeholder="Что уже получил..."></textarea></div>
@@ -726,6 +730,7 @@ function openAdd() {
   document.getElementById('f-progress').value = '';
   document.getElementById('f-results').value = '';
   document.getElementById('f-difficulties').value = '';
+  document.getElementById('f-freeze').value = '';
   document.getElementById('deleteBtn').style.display = 'none';
   setTariff('group'); setStatus('active');
   openSheet('bd-student');
@@ -748,6 +753,7 @@ function openEdit() {
   document.getElementById('f-progress').value = s.progress || '';
   document.getElementById('f-results').value = s.results || '';
   document.getElementById('f-difficulties').value = s.difficulties || '';
+  document.getElementById('f-freeze').value = (s.modules && s.modules[9] && s.modules[9].freeze_date) || '';
   document.getElementById('deleteBtn').style.display = 'block';
   setTariff(selectedTariff); setStatus(selectedStatus);
   openSheet('bd-student');
@@ -760,6 +766,10 @@ function setTariff(t) {
 function setStatus(s) {
   selectedStatus = s;
   document.querySelectorAll('#statusSeg button').forEach(b => b.classList.toggle('on', b.dataset.s === s));
+  document.getElementById('freezeDateFld').style.display = s === 'frozen' ? 'block' : 'none';
+  if (s === 'frozen' && !document.getElementById('f-freeze').value) {
+    document.getElementById('f-freeze').value = new Date().toISOString().slice(0,10);
+  }
 }
 
 async function saveStudent() {
@@ -781,11 +791,19 @@ async function saveStudent() {
     difficulties: document.getElementById('f-difficulties').value.trim(),
   };
   try {
+    // Save freeze date into modules[9]
+    const freezeDate = document.getElementById('f-freeze').value;
     if (editId) {
+      const existing = students.find(x => x.id === editId);
+      const mods = [...((existing && existing.modules) || [])];
+      while (mods.length <= 9) mods.push({});
+      mods[9] = { ...mods[9], freeze_date: data.status === 'frozen' ? (freezeDate || new Date().toISOString().slice(0,10)) : null };
+      data.modules = mods;
       await sbUpdate('students', editId, data);
       toast('Сохранено ✅');
     } else {
-      data.modules = [];
+      data.modules = [{},...Array(9).fill({})];
+      if (data.status === 'frozen') data.modules[9] = { freeze_date: freezeDate || new Date().toISOString().slice(0,10) };
       await sbInsert('students', data);
       toast('Ученик добавлен ✅');
       if (tg) tg.HapticFeedback.notificationOccurred('success');
@@ -860,6 +878,7 @@ function renderInfo() {
       <h4>Курс</h4>
       ${irow('Дата входа', fmtDate(s.start_date))}
       ${irow('Статус', s.status==='frozen'?'❄️ Заморожен':s.status==='done'?'✅ Завершил':'🟢 Активен')}
+      ${s.status==='frozen' && s.modules && s.modules[9] && s.modules[9].freeze_date ? irow('Заморожен с', fmtDate(s.modules[9].freeze_date) + ` (${Math.floor((Date.now()-new Date(s.modules[9].freeze_date))/86400000)} дн.)`) : ''}
       ${irow('Этап', s.progress || '—')}
     </div>
     ${s.problem ? `<div class="info-card"><h4>С чем пришёл</h4><p class="ir-text">${s.problem}</p></div>` : ''}
@@ -952,6 +971,32 @@ async function saveNotes() {
   if (s) s.notes = notes;
   toast('Заметки сохранены ✅');
   if (tg) tg.HapticFeedback.notificationOccurred('success');
+}
+
+/* ===== EXPORT CSV ===== */
+function exportCSV() {
+  const myStudents = role === 'senior' ? students : students.filter(s => s.curator === role);
+  const headers = ['Имя','Телефон','Telegram','Куратор','Тариф','Статус','Дата входа','Заморожен с','Пройдено модулей','Текущий этап','Результаты','Последний созвон'];
+  const rows = myStudents.map(s => {
+    const prog = getModuleProgress(s);
+    const freezeDate = s.modules && s.modules[9] && s.modules[9].freeze_date ? fmtDate(s.modules[9].freeze_date) : '';
+    const lastCall = getLastContact(s);
+    const tariffTxt = s.tariff==='ainur'?'Инд. с Айнур':s.tariff==='individual'?'Инд. с куратором':'В группе';
+    const statusTxt = s.status==='frozen'?'Заморожен':s.status==='done'?'Завершил':'Активен';
+    return [
+      s.name||'', s.phone||'', s.telegram||'', s.curator||'',
+      tariffTxt, statusTxt, fmtDate(s.start_date), freezeDate,
+      prog.completed + '/8', s.progress||'', s.results||'',
+      lastCall ? fmtDate(lastCall.date) + ' — ' + (lastCall.note||'') : ''
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+  });
+  const csv = '﻿' + [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'ученики_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+  toast('Файл скачан ✅');
 }
 
 /* ===== CALL LOG ===== */
