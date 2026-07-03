@@ -133,13 +133,17 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
       <span class="si">🔍</span>
       <input type="search" placeholder="Поиск по имени..." id="searchInput" oninput="renderList()">
     </div>
-    <div class="filters">
+    <div class="filters" id="statusFilters">
       <button class="chip on" data-f="all" onclick="setFilter('all')">Все</button>
       <button class="chip" data-f="active" onclick="setFilter('active')">В процессе</button>
       <button class="chip" data-f="frozen" onclick="setFilter('frozen')">❄️ Заморожены</button>
       <button class="chip" data-f="done" onclick="setFilter('done')">Завершили</button>
       <button class="chip" data-f="nomeeting" onclick="setFilter('nomeeting')">Нет созвона</button>
+      <button class="chip" data-f="group" onclick="setFilter('group')">👥 Группа</button>
+      <button class="chip" data-f="individual" onclick="setFilter('individual')">👤 Инд. с куратором</button>
+      <button class="chip" data-f="ainur" onclick="setFilter('ainur')">⭐ Инд. с Айнур</button>
     </div>
+    <div class="filters" id="monthFilters" style="margin-bottom:12px;"></div>
     <div id="studentList"><div class="loading"><div class="spinner"></div><span>Загружаю данные...</span></div></div>
   </div>
 </div>
@@ -169,6 +173,13 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
   <div class="fld"><label>Телефон</label><input id="ex-phone" type="tel" placeholder="87001234567"></div>
   <div class="fld"><label>Ник в Telegram</label><input id="ex-tg" placeholder="@username"></div>
   <div class="fld"><label>Куратор</label><input id="ex-curator" placeholder="Имя куратора"></div>
+  <div class="fld"><label>Тариф</label>
+    <select id="ex-tariff">
+      <option value="group">👥 В группе</option>
+      <option value="individual">👤 Индивидуальный с куратором</option>
+      <option value="ainur">⭐ Индивидуальный с Айнур</option>
+    </select>
+  </div>
   <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px;background:var(--gray-l);border-radius:12px;cursor:pointer;" onclick="toggleFrozen()">
     <div id="frozenToggle" style="width:44px;height:26px;border-radius:13px;background:var(--gray-m);position:relative;transition:.2s;flex-shrink:0;">
       <div style="width:22px;height:22px;border-radius:11px;background:#fff;position:absolute;top:2px;left:2px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);" id="frozenKnob"></div>
@@ -213,7 +224,29 @@ let students = [];
 let notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}');
 let extra = JSON.parse(localStorage.getItem(EXTRA_KEY) || '{}');
 let curFilter = 'all';
+let curMonth = 'all';
 let curId = null;
+
+const MONTH_RU = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
+const MONTH_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
+
+function parseMonth(dateStr) {
+  if (!dateStr) return null;
+  const s = dateStr.toLowerCase();
+  for (let i = 0; i < 12; i++) {
+    if (s.includes(MONTH_RU[i]) || s.includes(MONTH_SHORT[i])) return i;
+  }
+  const m = dateStr.match(/(\d{2})\.(\d{2})\.\d{4}/);
+  if (m) return parseInt(m[2]) - 1;
+  return null;
+}
+
+function detectTariff(rawName) {
+  const s = rawName.toLowerCase();
+  if (s.includes('айнур') || s.includes('ainur')) return 'ainur';
+  if (s.includes('индив') || s.includes('indiv')) return 'individual';
+  return 'group';
+}
 
 function saveNotes() { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); }
 function saveExtra() { localStorage.setItem(EXTRA_KEY, JSON.stringify(extra)); }
@@ -331,6 +364,7 @@ async function loadData() {
   }
   students = parseStudents(text);
   document.getElementById('lastUpdated').textContent = 'Обновлено: ' + new Date().toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
+  renderMonthFilters();
   renderList();
   toast('Данные загружены ✅');
 }
@@ -353,8 +387,27 @@ function renderStats() {
 /* ===== FILTER & LIST ===== */
 function setFilter(f) {
   curFilter = f;
-  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.f === f));
+  document.querySelectorAll('#statusFilters .chip').forEach(c => c.classList.toggle('on', c.dataset.f === f));
   renderList();
+}
+
+function setMonth(m) {
+  curMonth = m;
+  document.querySelectorAll('#monthFilters .chip').forEach(c => c.classList.toggle('on', c.dataset.m === m));
+  renderList();
+}
+
+function renderMonthFilters() {
+  const months = new Map();
+  students.forEach(s => {
+    const m = parseMonth(s.startDate);
+    if (m !== null) months.set(m, (months.get(m) || 0) + 1);
+  });
+  const sorted = [...months.entries()].sort((a,b) => a[0]-b[0]);
+  const mf = document.getElementById('monthFilters');
+  if (sorted.length === 0) { mf.innerHTML = ''; return; }
+  mf.innerHTML = '<button class="chip on" data-m="all" onclick="setMonth(\'all\')">📅 Все месяцы</button>' +
+    sorted.map(([m, cnt]) => `<button class="chip" data-m="${m}" onclick="setMonth('${m}')">${MONTH_SHORT[m].charAt(0).toUpperCase()+MONTH_SHORT[m].slice(1)} (${cnt})</button>`).join('');
 }
 
 function renderList() {
@@ -370,6 +423,16 @@ function renderList() {
     const cm = s.currentModule;
     return cm > 0 && !s.modules[cm - 1].meetingDone;
   });
+  const tariffFilters = ['group','individual','ainur'];
+  if (tariffFilters.includes(curFilter)) {
+    list = list.filter(s => {
+      const t = getExtra(s.id).tariff || detectTariff(s.rawName);
+      return t === curFilter;
+    });
+  }
+  if (curMonth !== 'all') {
+    list = list.filter(s => parseMonth(s.startDate) === parseInt(curMonth));
+  }
 
   const el = document.getElementById('studentList');
   if (list.length === 0) {
@@ -389,11 +452,13 @@ function renderList() {
       : s.isDone ? '<span class="badge badge-done">✅ Завершил</span>'
       : `<span class="badge badge-active">Модуль ${s.currentModule + 1}/8</span>`;
     const curator = ex.curator ? `<span style="font-size:11px;color:var(--muted)">👤 ${ex.curator}</span>` : '';
+    const tariff = ex.tariff || detectTariff(s.rawName);
+    const tariffLabel = tariff==='ainur' ? '⭐ Инд. с Айнур' : tariff==='individual' ? '👤 Инд.' : '👥 Группа';
     return `<div class="student-card" onclick="openProfile('${s.id}')">
       <div class="sc-avatar" style="${ex.frozen?'background:#EFF6FF;color:#1D4ED8':''}">${ex.frozen?'❄️':initials}</div>
       <div class="sc-body">
         <div class="sc-name">${s.name}</div>
-        <div class="sc-sub" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">${statusBadge}${curator}</div>
+        <div class="sc-sub" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${statusBadge}<span style="font-size:11px;color:var(--muted)">${tariffLabel}</span>${curator}</div>
         <div class="sc-progress" style="margin-top:6px">${dots}</div>
       </div>
       <div class="sc-arrow">›</div>
@@ -510,6 +575,7 @@ function openContacts() {
   document.getElementById('ex-phone').value = ex.phone || extractPhone(s ? s.rawName : '');
   document.getElementById('ex-tg').value = ex.telegram || '';
   document.getElementById('ex-curator').value = ex.curator || '';
+  document.getElementById('ex-tariff').value = ex.tariff || detectTariff(s ? s.rawName : '');
   frozenState = !!ex.frozen;
   updateFrozenToggle();
   document.getElementById('bd-contacts').style.display = 'flex';
@@ -527,6 +593,7 @@ function saveContacts() {
     phone: document.getElementById('ex-phone').value.trim(),
     telegram: document.getElementById('ex-tg').value.trim(),
     curator: document.getElementById('ex-curator').value.trim(),
+    tariff: document.getElementById('ex-tariff').value,
     frozen: frozenState,
   };
   saveExtra();
