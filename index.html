@@ -140,26 +140,35 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
 </head>
 <body>
 
+<!-- ROLE SELECTION -->
+<div class="screen active" id="s-role" style="background:linear-gradient(160deg,#1e3a5f,#1D4ED8);color:#fff;align-items:center;justify-content:center;padding:24px;">
+  <div style="font-size:48px;margin-bottom:16px;">👩‍🎓</div>
+  <div style="font-size:22px;font-weight:800;margin-bottom:8px;">Курс: Ученики</div>
+  <div style="font-size:14px;opacity:.75;margin-bottom:32px;">Выберите как вы входите</div>
+  <button onclick="loginSenior()" style="width:100%;max-width:340px;background:#fff;color:#1D4ED8;border:none;border-radius:14px;padding:16px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;gap:10px;">
+    <span style="font-size:22px;">⭐</span><span>Старший куратор<br><span style="font-size:12px;font-weight:400;color:#6B7280;">Управление всей системой</span></span>
+  </button>
+  <div style="width:100%;max-width:340px;" id="curatorLoginList"></div>
+  <div id="roleLoading" style="margin-top:16px;font-size:13px;opacity:.7;">Загрузка кураторов...</div>
+</div>
+
 <!-- LIST -->
-<div class="screen active" id="s-list">
+<div class="screen" id="s-list">
   <div class="hdr">
-    <div style="flex:1">
-      <div class="hdr-title">👩‍🎓 Ученики курса</div>
+    <button class="icon-btn icon-btn-ghost" onclick="logout()" title="Выход">←</button>
+    <div style="flex:1;margin-left:4px;">
+      <div class="hdr-title" id="hdrTitle">Ученики курса</div>
       <div class="hdr-sub" id="lastUpdated">Загрузка...</div>
     </div>
-    <button class="icon-btn icon-btn-ghost" onclick="loadStudents()" title="Обновить">↻</button>
-    <button class="icon-btn icon-btn-primary" onclick="openAdd()">+</button>
-  </div>
-  <!-- Curator mode banner -->
-  <div id="curatorBanner" style="display:none;background:var(--blue);color:#fff;padding:8px 14px;font-size:12px;font-weight:600;align-items:center;gap:8px;">
-    <span>👤 Режим куратора: <span id="curatorBannerName"></span></span>
-    <button onclick="setCuratorMode(null)" style="margin-left:auto;background:rgba(255,255,255,.25);border:none;color:#fff;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;">Выйти</button>
+    <button class="icon-btn icon-btn-ghost" onclick="loadStudents()">↻</button>
+    <button class="icon-btn icon-btn-primary" id="addBtn" onclick="openAdd()" style="display:none">+</button>
+    <button class="icon-btn icon-btn-ghost" id="mgmtBtn" onclick="openCuratorMgmt()" style="display:none;font-size:14px;">⚙️</button>
   </div>
   <div class="content">
     <div class="stats-bar" id="statsBar"></div>
     <div class="search-wrap">
       <span class="si">🔍</span>
-      <input type="search" placeholder="Поиск по имени или куратору..." id="searchInput" oninput="renderList()">
+      <input type="search" placeholder="Поиск по имени..." id="searchInput" oninput="renderList()">
     </div>
     <div class="filters" id="statusFilters">
       <button class="chip on" data-f="all" onclick="setFilter('all')">Все</button>
@@ -169,11 +178,6 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
       <button class="chip" data-f="group" onclick="setFilter('group')">👥 Группа</button>
       <button class="chip" data-f="individual" onclick="setFilter('individual')">👤 Инд. куратор</button>
       <button class="chip" data-f="ainur" onclick="setFilter('ainur')">⭐ Инд. Айнур</button>
-    </div>
-    <!-- Curator picker row -->
-    <div id="curatorRow" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:8px;scrollbar-width:none;align-items:center;">
-      <span style="font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0;">Куратор:</span>
-      <div id="curatorChips" style="display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;"></div>
     </div>
     <!-- Month filters: all 12 always shown -->
     <div class="month-filters" id="monthFilters"></div>
@@ -242,6 +246,19 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
 </div>
 </div>
 
+<!-- SHEET: CURATOR MANAGEMENT -->
+<div class="backdrop" id="bd-curators" onclick="if(event.target===this)closeSheet('bd-curators')">
+<div class="sheet">
+  <h3>⚙️ Управление кураторами</h3>
+  <div id="curatorMgmtList" style="margin-bottom:12px;"></div>
+  <div class="fld" style="display:flex;gap:8px;">
+    <input id="newCuratorName" placeholder="Имя нового куратора" style="flex:1;padding:10px 12px;border:1.5px solid var(--gray-m);border-radius:10px;font-family:inherit;font-size:14px;outline:none;">
+    <button onclick="addCurator()" style="background:var(--blue);color:#fff;border:none;border-radius:10px;padding:10px 14px;font-family:inherit;font-weight:700;cursor:pointer;">+</button>
+  </div>
+  <button class="btn-ghost" onclick="closeSheet('bd-curators')">Закрыть</button>
+</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -284,19 +301,19 @@ if (tg) { tg.ready(); tg.expand(); }
 /* ===== STATE ===== */
 const MONTH_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
 const MODULE_NAMES = ['Модуль 1','Модуль 2','Модуль 3','Модуль 4','Модуль 5','Модуль 6','Модуль 7','Модуль 8'];
+const CONFIG_ID = '00000000-0000-0000-0000-000000000001';
+const ROLE_KEY = 'crm_role_v2';
 
 let students = [];
+let curators = [];
 let curFilter = 'all';
 let curMonth = 'all';
-let curCurator = null;
 let curId = null;
 let editId = null;
 let selectedTariff = 'group';
 let selectedStatus = 'active';
 let editingModIdx = null;
-
-const CURATOR_KEY = 'crm_curator_v1';
-curCurator = localStorage.getItem(CURATOR_KEY) || null;
+let role = null; // 'senior' or curator name
 
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -310,67 +327,88 @@ function showScreen(id) {
   document.getElementById(id).classList.add('active');
   window.scrollTo(0, 0);
 }
-
 function closeSheet(id) { document.getElementById(id).classList.remove('show'); }
 function openSheet(id) { document.getElementById(id).classList.add('show'); }
 
-/* ===== LOAD ===== */
+/* ===== ROLE / LOGIN ===== */
+function loginSenior() {
+  role = 'senior';
+  localStorage.setItem(ROLE_KEY, 'senior');
+  enterApp();
+}
+function loginCurator(name) {
+  role = name;
+  localStorage.setItem(ROLE_KEY, name);
+  enterApp();
+}
+function logout() {
+  role = null;
+  localStorage.removeItem(ROLE_KEY);
+  showScreen('s-role');
+}
+function enterApp() {
+  const isSenior = role === 'senior';
+  document.getElementById('hdrTitle').textContent = isSenior ? '⭐ Старший куратор' : `👤 ${role}`;
+  document.getElementById('addBtn').style.display = isSenior ? 'flex' : 'none';
+  document.getElementById('mgmtBtn').style.display = isSenior ? 'flex' : 'none';
+  showScreen('s-list');
+  loadStudents();
+}
+
+/* ===== LOAD CONFIG (curators list) ===== */
+async function loadConfig() {
+  try {
+    const rows = await sbGet('students', `id=eq.${CONFIG_ID}&select=notes`);
+    if (rows && rows[0]) {
+      const cfg = JSON.parse(rows[0].notes || '{}');
+      curators = cfg.curators || [];
+    }
+  } catch(e) { curators = []; }
+}
+
+async function saveConfig() {
+  const cfg = JSON.stringify({ curators });
+  try {
+    const existing = await sbGet('students', `id=eq.${CONFIG_ID}&select=id`);
+    if (existing && existing[0]) {
+      await sbUpdate('students', CONFIG_ID, { notes: cfg });
+    } else {
+      await fetch(`${SB_URL}/rest/v1/students`, {
+        method: 'POST',
+        headers: { ...sbHeaders, 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ id: CONFIG_ID, name: '__config__', notes: cfg, modules: [] })
+      });
+    }
+  } catch(e) {}
+}
+
+/* ===== LOAD STUDENTS ===== */
 async function loadStudents() {
   document.getElementById('studentList').innerHTML = '<div class="loading"><div class="spinner"></div><span>Загрузка...</span></div>';
   try {
-    const data = await sbGet('students', 'order=created_at.asc');
+    const data = await sbGet('students', `id=neq.${CONFIG_ID}&order=created_at.asc`);
     if (Array.isArray(data)) {
       students = data;
       document.getElementById('lastUpdated').textContent = 'Обновлено ' + new Date().toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
       renderMonthFilters();
-      renderCuratorChips();
-      setCuratorMode(curCurator);
       renderList();
-    } else {
-      throw new Error(JSON.stringify(data));
-    }
+    } else throw new Error();
   } catch(e) {
-    document.getElementById('studentList').innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>Ошибка загрузки.<br>Проверь подключение.</p></div>';
-    document.getElementById('lastUpdated').textContent = 'Ошибка';
+    document.getElementById('studentList').innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>Ошибка загрузки</p></div>';
   }
 }
 
 /* ===== STATS ===== */
 function renderStats() {
-  const total = students.length;
-  const active = students.filter(s => s.status === 'active').length;
-  const frozen = students.filter(s => s.status === 'frozen').length;
-  const done = students.filter(s => s.status === 'done').length;
+  const list = role === 'senior' ? students : students.filter(s => s.curator === role);
+  const active = list.filter(s => s.status === 'active').length;
+  const frozen = list.filter(s => s.status === 'frozen').length;
+  const done = list.filter(s => s.status === 'done').length;
   document.getElementById('statsBar').innerHTML = `
-    <div class="stat-card"><div class="stat-num" style="color:var(--blue)">${total}</div><div class="stat-lbl">Всего</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--blue)">${list.length}</div><div class="stat-lbl">Всего</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--green)">${active}</div><div class="stat-lbl">Активных</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${frozen}</div><div class="stat-lbl">Заморожено</div></div>
     <div class="stat-card"><div class="stat-num" style="color:var(--gray)">${done}</div><div class="stat-lbl">Завершили</div></div>`;
-}
-
-/* ===== CURATOR MODE ===== */
-function setCuratorMode(name) {
-  curCurator = name;
-  if (name) localStorage.setItem(CURATOR_KEY, name);
-  else localStorage.removeItem(CURATOR_KEY);
-  const banner = document.getElementById('curatorBanner');
-  if (name) {
-    banner.style.cssText = 'display:flex;background:var(--blue);color:#fff;padding:8px 14px;font-size:12px;font-weight:600;align-items:center;gap:8px;';
-    document.getElementById('curatorBannerName').textContent = name;
-  } else {
-    banner.style.cssText = 'display:none;';
-  }
-  renderCuratorChips();
-  renderList();
-}
-
-function renderCuratorChips() {
-  const curators = [...new Set(students.map(s=>s.curator).filter(Boolean))].sort();
-  const el = document.getElementById('curatorChips');
-  if (!curators.length) { document.getElementById('curatorRow').style.display='none'; return; }
-  document.getElementById('curatorRow').style.display = 'flex';
-  el.innerHTML = '<button class="chip ' + (!curCurator?'on':'') + '" onclick="setCuratorMode(null)" style="flex-shrink:0">Все</button>' +
-    curators.map(c=>`<button class="chip ${curCurator===c?'on':''}" onclick="setCuratorMode('${c.replace(/'/g,"\\'")}')">👤 ${c}</button>`).join('');
 }
 
 /* ===== MONTH FILTERS ===== */
@@ -386,8 +424,7 @@ function renderMonthFilters() {
   el.innerHTML = '<button class="chip on" data-m="all" onclick="setMonth(\'all\')">📅 Все</button>' +
     MONTH_SHORT.map((name, i) => {
       const cnt = counts[i];
-      const style = cnt === 0 ? 'opacity:.4' : '';
-      return `<button class="chip" data-m="${i}" onclick="setMonth('${i}')" style="${style}">${name}${cnt?' ('+cnt+')':''}</button>`;
+      return `<button class="chip" data-m="${i}" onclick="setMonth('${i}')" style="${cnt===0?'opacity:.4':''}">${name}${cnt?' ('+cnt+')':''}</button>`;
     }).join('');
 }
 
@@ -403,6 +440,53 @@ function setMonth(m) {
   renderList();
 }
 
+/* ===== CURATOR MANAGEMENT ===== */
+function openCuratorMgmt() {
+  renderCuratorMgmtList();
+  openSheet('bd-curators');
+}
+function renderCuratorMgmtList() {
+  const el = document.getElementById('curatorMgmtList');
+  if (!curators.length) { el.innerHTML = '<p style="color:var(--muted);font-size:13px;margin-bottom:8px;">Кураторов пока нет</p>'; return; }
+  el.innerHTML = curators.map((c,i) => `
+    <div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray-l);">
+      <span style="flex:1;font-size:14px;font-weight:500;">👤 ${c}</span>
+      <button onclick="renameCurator(${i})" style="background:var(--blue-l);color:var(--blue-d);border:none;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;">✏️</button>
+      <button onclick="deleteCurator(${i})" style="background:var(--red-l);color:var(--red);border:none;border-radius:7px;padding:5px 10px;font-size:12px;cursor:pointer;">🗑</button>
+    </div>`).join('');
+}
+async function addCurator() {
+  const name = document.getElementById('newCuratorName').value.trim();
+  if (!name) return;
+  curators.push(name);
+  document.getElementById('newCuratorName').value = '';
+  await saveConfig();
+  renderCuratorMgmtList();
+  renderRoleScreen();
+  toast('Куратор добавлен ✅');
+}
+async function deleteCurator(idx) {
+  curators.splice(idx, 1);
+  await saveConfig();
+  renderCuratorMgmtList();
+  renderRoleScreen();
+  toast('Куратор удалён');
+}
+function renameCurator(idx) {
+  const name = prompt('Новое имя:', curators[idx]);
+  if (!name || name === curators[idx]) return;
+  curators[idx] = name;
+  saveConfig().then(() => { renderCuratorMgmtList(); renderRoleScreen(); toast('Имя обновлено'); });
+}
+function renderRoleScreen() {
+  document.getElementById('curatorLoginList').innerHTML = curators.map(c =>
+    `<button onclick="loginCurator('${c.replace(/'/g,"\\'")}') " style="width:100%;background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);border-radius:14px;padding:14px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:8px;text-align:left;display:flex;align-items:center;gap:10px;">
+      <span style="font-size:20px;">👤</span><span>${c}</span>
+    </button>`
+  ).join('');
+  document.getElementById('roleLoading').style.display = 'none';
+}
+
 function getModuleProgress(s) {
   const mods = s.modules || [];
   const completed = mods.filter(m => m.hw && m.meeting).length;
@@ -414,24 +498,19 @@ function getModuleProgress(s) {
 function renderList() {
   renderStats();
   const q = document.getElementById('searchInput').value.toLowerCase().trim();
-  let list = students;
+  let list = role === 'senior' ? [...students] : students.filter(s => s.curator === role);
 
-  if (q) list = list.filter(s => (s.name||'').toLowerCase().includes(q) || (s.curator||'').toLowerCase().includes(q) || (s.phone||'').includes(q));
+  if (q) list = list.filter(s => (s.name||'').toLowerCase().includes(q) || (s.phone||'').includes(q));
   if (curFilter === 'active') list = list.filter(s => s.status === 'active');
   else if (curFilter === 'frozen') list = list.filter(s => s.status === 'frozen');
   else if (curFilter === 'done') list = list.filter(s => s.status === 'done');
   else if (['group','individual','ainur'].includes(curFilter)) list = list.filter(s => s.tariff === curFilter);
-
-  if (curMonth !== 'all') {
-    list = list.filter(s => s.start_date && new Date(s.start_date).getMonth() === parseInt(curMonth));
-  }
-  if (curCurator) {
-    list = list.filter(s => s.curator === curCurator);
-  }
+  if (curMonth !== 'all') list = list.filter(s => s.start_date && new Date(s.start_date).getMonth() === parseInt(curMonth));
 
   const el = document.getElementById('studentList');
   if (!list.length) {
-    el.innerHTML = `<div class="empty"><div class="ei">🎓</div><p>${!students.length ? 'Нет учеников. Нажми + чтобы добавить' : 'Никого не найдено'}</p></div>`;
+    const isSenior = role === 'senior';
+    el.innerHTML = `<div class="empty"><div class="ei">🎓</div><p>${isSenior && !students.length ? 'Нет учеников. Нажми + чтобы добавить' : 'Никого не найдено'}</p></div>`;
     return;
   }
 
@@ -460,7 +539,6 @@ function renderList() {
   }).join('');
 
   // update curator datalist
-  const curators = [...new Set(students.map(s=>s.curator).filter(Boolean))];
   document.getElementById('curatorList').innerHTML = curators.map(c=>`<option value="${c}">`).join('');
 }
 
@@ -572,10 +650,11 @@ function openProfile(id) {
   document.getElementById('phName').textContent = s.name || '—';
   document.getElementById('phSub').textContent = [s.curator ? '👤 '+s.curator : '', s.start_date ? 'с '+fmtDate(s.start_date) : ''].filter(Boolean).join(' · ') || '—';
   const sb = s.status==='frozen'?'❄️ Заморожен':s.status==='done'?'✅ Завершил курс':`📍 ${prog.completed}/8 модулей`;
+  const canEdit = role === 'senior' || s.curator === role;
   document.getElementById('phBadges').innerHTML =
     `<span class="ph-badge">${sb}</span>` +
     (s.tariff==='ainur'?'<span class="ph-badge">⭐ Инд.Айнур</span>':s.tariff==='individual'?'<span class="ph-badge">👤 Инд.куратор</span>':'<span class="ph-badge">👥 Группа</span>') +
-    `<span class="ph-badge" onclick="openEdit()" style="cursor:pointer">✏️ Изменить</span>`;
+    (canEdit ? `<span class="ph-badge" onclick="openEdit()" style="cursor:pointer">✏️ Изменить</span>` : '');
   showScreen('s-profile');
   switchTab('info');
 }
@@ -696,7 +775,15 @@ async function saveNotes() {
 }
 
 /* ===== INIT ===== */
-loadStudents();
+(async () => {
+  await loadConfig();
+  renderRoleScreen();
+  const saved = localStorage.getItem(ROLE_KEY);
+  if (saved) {
+    role = saved;
+    enterApp();
+  }
+})();
 </script>
 </body>
 </html>
