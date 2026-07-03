@@ -151,7 +151,7 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
     <button class="icon-btn icon-btn-primary" onclick="openAdd()">+</button>
   </div>
   <!-- Curator mode banner -->
-  <div id="curatorBanner" style="display:none;background:var(--blue);color:#fff;padding:8px 14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;">
+  <div id="curatorBanner" style="display:none;background:var(--blue);color:#fff;padding:8px 14px;font-size:12px;font-weight:600;align-items:center;gap:8px;">
     <span>👤 Режим куратора: <span id="curatorBannerName"></span></span>
     <button onclick="setCuratorMode(null)" style="margin-left:auto;background:rgba(255,255,255,.25);border:none;color:#fff;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;">Выйти</button>
   </div>
@@ -355,10 +355,10 @@ function setCuratorMode(name) {
   else localStorage.removeItem(CURATOR_KEY);
   const banner = document.getElementById('curatorBanner');
   if (name) {
-    banner.style.display = 'flex';
+    banner.style.cssText = 'display:flex;background:var(--blue);color:#fff;padding:8px 14px;font-size:12px;font-weight:600;align-items:center;gap:8px;';
     document.getElementById('curatorBannerName').textContent = name;
   } else {
-    banner.style.display = 'none';
+    banner.style.cssText = 'display:none;';
   }
   renderCuratorChips();
   renderList();
