@@ -22,135 +22,157 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
 .screen{display:none;min-height:100vh;flex-direction:column;}
 .screen.active{display:flex;}
 
-.hdr{background:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--gray-m);position:sticky;top:0;z-index:10;padding-top:calc(14px + env(safe-area-inset-top));}
-.hdr-back{width:36px;height:36px;border-radius:10px;background:var(--gray-l);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;}
-.hdr-title{font-size:17px;font-weight:700;flex:1;}
-.hdr-sub{font-size:12px;color:var(--muted);font-weight:400;}
-.hdr-btn{padding:8px 14px;border-radius:10px;background:var(--blue-l);border:none;color:var(--blue-d);font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;}
+.hdr{background:#fff;padding:12px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--gray-m);position:sticky;top:0;z-index:10;padding-top:calc(12px + env(safe-area-inset-top));}
+.hdr-title{font-size:16px;font-weight:700;flex:1;}
+.hdr-sub{font-size:11px;color:var(--muted);font-weight:400;}
+.icon-btn{width:36px;height:36px;border-radius:10px;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;}
+.icon-btn-primary{background:var(--blue);color:#fff;font-size:22px;font-weight:300;}
+.icon-btn-ghost{background:var(--gray-l);color:var(--muted);}
 
-.content{flex:1;padding:14px 14px 24px;overflow-y:auto;}
+.content{flex:1;padding:12px 12px 24px;overflow-y:auto;}
 
-.search-wrap{position:relative;margin-bottom:10px;}
-.search-wrap input{width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--gray-m);border-radius:12px;font-family:inherit;font-size:14px;color:var(--ink);background:#fff;outline:none;}
+.search-wrap{position:relative;margin-bottom:8px;}
+.search-wrap input{width:100%;padding:9px 12px 9px 36px;border:1.5px solid var(--gray-m);border-radius:11px;font-family:inherit;font-size:14px;color:var(--ink);background:#fff;outline:none;}
 .search-wrap input:focus{border-color:var(--blue);}
-.search-wrap .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);pointer-events:none;}
+.search-wrap .si{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;}
 
-.filters{display:flex;gap:7px;overflow-x:auto;padding-bottom:2px;margin-bottom:12px;scrollbar-width:none;}
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:10px;scrollbar-width:none;}
 .filters::-webkit-scrollbar{display:none;}
-.chip{border:1.5px solid var(--gray-m);background:#fff;border-radius:20px;padding:6px 13px;font-family:inherit;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.chip{border:1.5px solid var(--gray-m);background:#fff;border-radius:18px;padding:5px 12px;font-family:inherit;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;}
 .chip.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue-d);}
 
-.stats-bar{display:flex;gap:8px;margin-bottom:12px;}
-.stat-card{flex:1;background:#fff;border-radius:12px;padding:10px 8px;box-shadow:var(--shadow);text-align:center;}
-.stat-num{font-size:20px;font-weight:800;}
+.stats-bar{display:flex;gap:7px;margin-bottom:10px;}
+.stat-card{flex:1;background:#fff;border-radius:11px;padding:9px 6px;box-shadow:var(--shadow);text-align:center;}
+.stat-num{font-size:19px;font-weight:800;}
 .stat-lbl{font-size:10px;color:var(--muted);margin-top:1px;}
 
-.student-card{background:var(--card);border-radius:14px;padding:13px;margin-bottom:8px;box-shadow:var(--shadow);cursor:pointer;display:flex;align-items:flex-start;gap:11px;}
-.sc-avatar{width:42px;height:42px;border-radius:12px;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:var(--blue-d);flex-shrink:0;}
+.student-card{background:var(--card);border-radius:13px;padding:12px;margin-bottom:7px;box-shadow:var(--shadow);cursor:pointer;display:flex;align-items:flex-start;gap:10px;}
+.sc-avatar{width:40px;height:40px;border-radius:11px;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--blue-d);flex-shrink:0;}
 .sc-body{flex:1;min-width:0;}
-.sc-name{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.sc-sub{font-size:12px;color:var(--muted);margin-top:2px;}
-.sc-progress{display:flex;gap:3px;margin-top:7px;}
-.sc-dot{width:18px;height:6px;border-radius:3px;background:var(--gray-m);}
-.sc-dot.hw{background:var(--amber);}
+.sc-name{font-size:14px;font-weight:600;}
+.sc-sub{font-size:11px;color:var(--muted);margin-top:2px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+.sc-progress{display:flex;gap:3px;margin-top:6px;}
+.sc-dot{width:22px;height:5px;border-radius:3px;background:var(--gray-m);}
 .sc-dot.full{background:var(--green);}
+.sc-dot.partial{background:var(--amber);}
 .sc-dot.cur{background:var(--blue);}
-.sc-arrow{color:var(--gray-m);font-size:20px;align-self:center;}
-
-.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;display:inline-block;}
+.badge{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;display:inline-block;}
 .badge-active{background:var(--green-l);color:#15803D;}
-.badge-frozen{background:#EFF6FF;color:#1D4ED8;}
+.badge-frozen{background:#DBEAFE;color:#1D4ED8;}
 .badge-done{background:var(--gray-l);color:var(--gray);}
+.sc-arr{color:var(--gray-m);font-size:18px;align-self:center;}
 
-.empty{text-align:center;padding:48px 16px;color:var(--muted);}
-.empty .ei{font-size:44px;margin-bottom:10px;}
+.empty{text-align:center;padding:40px 16px;color:var(--muted);}
+.empty .ei{font-size:40px;margin-bottom:8px;}
 
 /* PROFILE */
-.profile-hero{background:linear-gradient(135deg,#1e3a5f,#2563EB);color:#fff;padding:16px;padding-top:calc(16px + env(safe-area-inset-top));}
-.ph-back{width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.18);border:none;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-bottom:10px;}
-.ph-name{font-size:20px;font-weight:800;margin-bottom:3px;}
+.profile-hero{background:linear-gradient(135deg,#1e3a5f,#2563EB);color:#fff;padding:14px;padding-top:calc(14px + env(safe-area-inset-top));}
+.ph-back{width:32px;height:32px;border-radius:8px;background:rgba(255,255,255,.18);border:none;color:#fff;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;margin-bottom:8px;}
+.ph-name{font-size:19px;font-weight:800;margin-bottom:2px;}
 .ph-sub{font-size:12px;opacity:.8;}
-.ph-badges{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
-.ph-badge{padding:4px 11px;border-radius:9px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);}
+.ph-badges{display:flex;gap:7px;margin-top:8px;flex-wrap:wrap;}
+.ph-badge{padding:3px 10px;border-radius:8px;font-size:11px;font-weight:600;background:rgba(255,255,255,.18);cursor:pointer;}
 
 .tabs{display:flex;background:#fff;border-bottom:1px solid var(--gray-m);position:sticky;top:0;z-index:5;}
-.tab{flex:1;padding:11px 4px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;}
+.tab{flex:1;padding:10px 4px;border:none;background:none;font-family:inherit;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;}
 .tab.on{color:var(--blue-d);border-bottom-color:var(--blue);}
-.tab-content{display:none;padding:14px 14px 24px;}
+.tab-content{display:none;padding:12px 12px 24px;}
 .tab-content.on{display:block;}
 
-.info-card{background:#fff;border-radius:14px;padding:13px;margin-bottom:10px;box-shadow:var(--shadow);}
-.info-card h4{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
-.info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--gray-l);}
+.info-card{background:#fff;border-radius:13px;padding:12px;margin-bottom:9px;box-shadow:var(--shadow);}
+.info-card h4{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--gray-l);}
 .info-row:last-child{border-bottom:none;padding-bottom:0;}
-.ir-lbl{font-size:13px;color:var(--muted);flex-shrink:0;margin-right:10px;}
-.ir-val{font-size:13px;font-weight:500;text-align:right;word-break:break-word;}
-.ir-text{font-size:13px;line-height:1.55;margin-top:4px;color:var(--ink);}
+.ir-lbl{font-size:12px;color:var(--muted);flex-shrink:0;margin-right:8px;}
+.ir-val{font-size:12px;font-weight:500;text-align:right;}
+.ir-text{font-size:13px;line-height:1.55;margin-top:2px;}
 
-.module-item{background:#fff;border-radius:14px;padding:13px;margin-bottom:8px;box-shadow:var(--shadow);}
-.module-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
-.module-name{font-size:14px;font-weight:700;}
-.module-status{font-size:12px;font-weight:600;padding:3px 9px;border-radius:7px;}
+.module-item{background:#fff;border-radius:13px;padding:12px;margin-bottom:7px;box-shadow:var(--shadow);}
+.module-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;}
+.module-name{font-size:13px;font-weight:700;}
+.module-status{font-size:11px;font-weight:600;padding:2px 8px;border-radius:6px;}
 .ms-full{background:var(--green-l);color:#15803D;}
-.ms-hw{background:var(--amber-l);color:#B45309;}
+.ms-partial{background:var(--amber-l);color:#B45309;}
 .ms-none{background:var(--gray-l);color:var(--gray);}
 .ms-cur{background:var(--blue-l);color:var(--blue-d);}
-.module-row{display:flex;align-items:center;gap:8px;margin-top:6px;}
-.mcheck{font-size:14px;}
+.module-row{display:flex;align-items:center;gap:7px;margin-top:5px;cursor:pointer;}
+.mcheck{font-size:13px;}
 .module-sub{font-size:12px;color:var(--muted);}
-.module-comment{font-size:12px;color:var(--ink);background:var(--gray-l);border-radius:8px;padding:6px 10px;margin-top:6px;line-height:1.4;}
+.module-comment{font-size:11px;color:var(--ink);background:var(--gray-l);border-radius:7px;padding:5px 8px;margin-top:5px;line-height:1.4;}
+.add-note-btn{width:100%;padding:8px;border:1.5px dashed var(--gray-m);border-radius:10px;background:none;font-family:inherit;font-size:12px;color:var(--muted);cursor:pointer;margin-top:6px;}
 
-.note-area{background:#fff;border-radius:14px;padding:13px;margin-bottom:10px;box-shadow:var(--shadow);}
-.note-area h4{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
-.note-area textarea{width:100%;border:1.5px solid var(--gray-m);border-radius:10px;padding:10px;font-family:inherit;font-size:13px;resize:vertical;min-height:80px;outline:none;}
-.note-area textarea:focus{border-color:var(--blue);}
-.note-save{margin-top:8px;padding:9px 18px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;}
+/* SHEET */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:none;align-items:flex-end;justify-content:center;}
+.backdrop.show{display:flex;}
+.sheet{width:100%;max-width:480px;background:#fff;border-radius:22px 22px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow-y:auto;animation:slideUp .28s ease;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:none;}}
+.sheet h3{font-size:17px;font-weight:700;margin-bottom:14px;}
+.fld{margin-bottom:11px;}
+.fld label{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-bottom:5px;}
+.fld input,.fld select,.fld textarea{width:100%;padding:11px 13px;border:1.5px solid var(--gray-m);border-radius:11px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;background:#fff;resize:vertical;}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--blue);}
+.fld textarea{min-height:70px;}
+.seg2{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.seg2 button{border:1.5px solid var(--gray-m);background:#fff;border-radius:10px;padding:7px 12px;font-family:inherit;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;}
+.seg2 button.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue-d);}
+.btn-primary{width:100%;background:var(--blue);color:#fff;border:none;border-radius:12px;padding:13px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-top:4px;}
+.btn-danger{width:100%;background:var(--red-l);color:var(--red);border:none;border-radius:12px;padding:12px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;margin-top:6px;}
+.btn-ghost{width:100%;background:none;color:var(--muted);border:none;padding:9px;font-family:inherit;font-size:12px;cursor:pointer;margin-top:2px;}
 
-.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:200px;gap:12px;color:var(--muted);}
-.spinner{width:32px;height:32px;border:3px solid var(--gray-m);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite;}
+.toggle-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--gray-l);border-radius:11px;cursor:pointer;margin-bottom:12px;}
+.toggle{width:42px;height:24px;border-radius:12px;background:var(--gray-m);position:relative;transition:.2s;flex-shrink:0;}
+.toggle.on{background:var(--blue);}
+.toggle-knob{width:20px;height:20px;border-radius:10px;background:#fff;position:absolute;top:2px;left:2px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on .toggle-knob{left:20px;}
+.toggle-lbl{font-size:13px;font-weight:600;}
+.toggle-sub{font-size:11px;color:var(--muted);}
+
+.loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:160px;gap:10px;color:var(--muted);}
+.spinner{width:28px;height:28px;border:3px solid var(--gray-m);border-top-color:var(--blue);border-radius:50%;animation:spin .7s linear infinite;}
 @keyframes spin{to{transform:rotate(360deg);}}
 
-.toast{position:fixed;bottom:calc(18px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 18px;border-radius:11px;font-size:13px;font-weight:600;z-index:100;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;}
+.toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:600;z-index:100;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;}
 .toast.show{opacity:1;}
 
-.refresh-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;background:var(--gray-l);border:none;border-radius:10px;font-family:inherit;font-size:13px;color:var(--muted);cursor:pointer;margin-bottom:12px;}
+.month-filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:8px;scrollbar-width:none;}
+.month-filters::-webkit-scrollbar{display:none;}
 </style>
 </head>
 <body>
 
-<!-- LIST SCREEN -->
+<!-- LIST -->
 <div class="screen active" id="s-list">
   <div class="hdr">
-    <div>
+    <div style="flex:1">
       <div class="hdr-title">👩‍🎓 Ученики курса</div>
-      <div class="hdr-sub" id="lastUpdated"></div>
+      <div class="hdr-sub" id="lastUpdated">Загрузка...</div>
     </div>
-    <button class="hdr-btn" onclick="loadData()">↻ Обновить</button>
+    <button class="icon-btn icon-btn-ghost" onclick="loadStudents()" title="Обновить">↻</button>
+    <button class="icon-btn icon-btn-primary" onclick="openAdd()">+</button>
   </div>
   <div class="content">
     <div class="stats-bar" id="statsBar"></div>
     <div class="search-wrap">
       <span class="si">🔍</span>
-      <input type="search" placeholder="Поиск по имени..." id="searchInput" oninput="renderList()">
+      <input type="search" placeholder="Поиск по имени или куратору..." id="searchInput" oninput="renderList()">
     </div>
     <div class="filters" id="statusFilters">
       <button class="chip on" data-f="all" onclick="setFilter('all')">Все</button>
-      <button class="chip" data-f="active" onclick="setFilter('active')">В процессе</button>
+      <button class="chip" data-f="active" onclick="setFilter('active')">Активные</button>
       <button class="chip" data-f="frozen" onclick="setFilter('frozen')">❄️ Заморожены</button>
       <button class="chip" data-f="done" onclick="setFilter('done')">Завершили</button>
-      <button class="chip" data-f="nomeeting" onclick="setFilter('nomeeting')">Нет созвона</button>
       <button class="chip" data-f="group" onclick="setFilter('group')">👥 Группа</button>
-      <button class="chip" data-f="individual" onclick="setFilter('individual')">👤 Инд. с куратором</button>
-      <button class="chip" data-f="ainur" onclick="setFilter('ainur')">⭐ Инд. с Айнур</button>
+      <button class="chip" data-f="individual" onclick="setFilter('individual')">👤 Инд. куратор</button>
+      <button class="chip" data-f="ainur" onclick="setFilter('ainur')">⭐ Инд. Айнур</button>
     </div>
-    <div class="filters" id="monthFilters" style="margin-bottom:12px;"></div>
-    <div id="studentList"><div class="loading"><div class="spinner"></div><span>Загружаю данные...</span></div></div>
+    <div class="month-filters" id="monthFilters"></div>
+    <div id="studentList"><div class="loading"><div class="spinner"></div><span>Загрузка...</span></div></div>
   </div>
 </div>
 
-<!-- PROFILE SCREEN -->
+<!-- PROFILE -->
 <div class="screen" id="s-profile">
-  <div class="profile-hero" id="profileHero">
+  <div class="profile-hero">
     <button class="ph-back" onclick="showScreen('s-list')">←</button>
     <div class="ph-name" id="phName">—</div>
     <div class="ph-sub" id="phSub">—</div>
@@ -166,96 +188,100 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
   <div class="tab-content" id="tab-notes"></div>
 </div>
 
-<!-- SHEET: EDIT CONTACTS -->
-<div style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:none;align-items:flex-end;justify-content:center;" id="bd-contacts" onclick="if(event.target===this)closeContacts()">
-<div style="width:100%;max-width:480px;background:#fff;border-radius:24px 24px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));animation:slideUp .28s ease;">
-  <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;">Контакты и куратор</h3>
-  <div class="fld"><label>Телефон</label><input id="ex-phone" type="tel" placeholder="87001234567"></div>
-  <div class="fld"><label>Ник в Telegram</label><input id="ex-tg" placeholder="@username"></div>
-  <div class="fld"><label>Куратор</label><input id="ex-curator" placeholder="Имя куратора"></div>
+<!-- SHEET: ADD/EDIT STUDENT -->
+<div class="backdrop" id="bd-student" onclick="if(event.target===this)closeSheet('bd-student')">
+<div class="sheet">
+  <h3 id="sheetTitle">Новый ученик</h3>
+  <div class="fld"><label>Имя и фамилия *</label><input id="f-name" placeholder="Айнур Жанузак"></div>
+  <div class="fld"><label>Телефон</label><input id="f-phone" type="tel" placeholder="87001234567"></div>
+  <div class="fld"><label>Ник Telegram</label><input id="f-tg" placeholder="@username"></div>
+  <div class="fld"><label>Куратор</label><input id="f-curator" placeholder="Имя куратора" list="curatorList"><datalist id="curatorList"></datalist></div>
   <div class="fld"><label>Тариф</label>
-    <select id="ex-tariff">
-      <option value="group">👥 В группе</option>
-      <option value="individual">👤 Индивидуальный с куратором</option>
-      <option value="ainur">⭐ Индивидуальный с Айнур</option>
-    </select>
-  </div>
-  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px;background:var(--gray-l);border-radius:12px;cursor:pointer;" onclick="toggleFrozen()">
-    <div id="frozenToggle" style="width:44px;height:26px;border-radius:13px;background:var(--gray-m);position:relative;transition:.2s;flex-shrink:0;">
-      <div style="width:22px;height:22px;border-radius:11px;background:#fff;position:absolute;top:2px;left:2px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);" id="frozenKnob"></div>
-    </div>
-    <div>
-      <div style="font-size:14px;font-weight:600;">❄️ Заморожен</div>
-      <div style="font-size:12px;color:var(--muted);">Участник приостановил курс</div>
+    <div class="seg2" id="tariffSeg">
+      <button class="on" data-t="group" onclick="setTariff('group')">👥 В группе</button>
+      <button data-t="individual" onclick="setTariff('individual')">👤 Инд. с куратором</button>
+      <button data-t="ainur" onclick="setTariff('ainur')">⭐ Инд. с Айнур</button>
     </div>
   </div>
-  <button onclick="saveContacts()" style="width:100%;background:var(--blue);color:#fff;border:none;border-radius:13px;padding:14px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;">Сохранить</button>
-  <button onclick="closeContacts()" style="width:100%;background:none;color:var(--muted);border:none;padding:10px;font-family:inherit;font-size:13px;cursor:pointer;margin-top:4px;">Отмена</button>
+  <div class="fld"><label>Дата входа</label><input id="f-start" type="date"></div>
+  <div class="fld"><label>Статус</label>
+    <div class="seg2" id="statusSeg">
+      <button class="on" data-s="active" onclick="setStatus('active')">🟢 Активен</button>
+      <button data-s="frozen" onclick="setStatus('frozen')">❄️ Заморожен</button>
+      <button data-s="done" onclick="setStatus('done')">✅ Завершил</button>
+    </div>
+  </div>
+  <div class="fld"><label>С чем пришёл на курс</label><textarea id="f-problem" placeholder="Запрос, жалобы..."></textarea></div>
+  <div class="fld"><label>Текущий этап</label><input id="f-progress" placeholder="Модуль 3, урок 2"></div>
+  <div class="fld"><label>Результаты</label><textarea id="f-results" placeholder="Что уже получил..."></textarea></div>
+  <div class="fld"><label>Сложности</label><textarea id="f-difficulties" placeholder="С чем испытывает трудности..."></textarea></div>
+  <button class="btn-primary" id="saveBtn" onclick="saveStudent()">Сохранить</button>
+  <button class="btn-danger" id="deleteBtn" style="display:none" onclick="deleteStudent()">Удалить ученика</button>
+  <button class="btn-ghost" onclick="closeSheet('bd-student')">Отмена</button>
+</div>
+</div>
+
+<!-- SHEET: MODULE NOTE -->
+<div class="backdrop" id="bd-module" onclick="if(event.target===this)closeSheet('bd-module')">
+<div class="sheet">
+  <h3 id="moduleSheetTitle">Заметка к модулю</h3>
+  <div class="fld"><label>Комментарий</label><textarea id="mod-comment" placeholder="Что обсудили, договорённости..."></textarea></div>
+  <button class="btn-primary" onclick="saveModuleComment()">Сохранить</button>
+  <button class="btn-ghost" onclick="closeSheet('bd-module')">Отмена</button>
 </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
+/* ===== SUPABASE CONFIG ===== */
+const SB_URL = 'https://mmmtrfsestqbrjvseoea.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1tbXRyZnNlc3RxYnJqdnNlb2VhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMwODU3NzEsImV4cCI6MjA5ODY2MTc3MX0.Xfj-FghqW1g6bQJhKPWyjgatGa0DY5AHaYhZEaCIkxM';
+
+const sbHeaders = {
+  'Content-Type': 'application/json',
+  'apikey': SB_KEY,
+  'Authorization': 'Bearer ' + SB_KEY,
+};
+
+async function sbGet(table, params = '') {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?${params}`, { headers: sbHeaders });
+  return r.json();
+}
+async function sbInsert(table, data) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, {
+    method: 'POST', headers: { ...sbHeaders, 'Prefer': 'return=representation' },
+    body: JSON.stringify(data)
+  });
+  return r.json();
+}
+async function sbUpdate(table, id, data) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, {
+    method: 'PATCH', headers: { ...sbHeaders, 'Prefer': 'return=representation' },
+    body: JSON.stringify(data)
+  });
+  return r.json();
+}
+async function sbDelete(table, id) {
+  await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, { method: 'DELETE', headers: sbHeaders });
+}
+
+/* ===== TELEGRAM ===== */
 const tg = window.Telegram && window.Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-const SHEET_ID = '1cD9jLk-9jYowr4NWpcJxpNi3Sgkrf5pE-pQ5PiGvsbM';
-const SHEET_CSV = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv')}`;
-const NOTES_KEY = 'crm_notes_v1';
-const EXTRA_KEY = 'crm_extra_v1'; // phone, telegram, curator, frozen
-
-const MODULE_HW = [
-  'Д/з глоток воды',
-  'Д/з тест уздечки',
-  'Д/з видео жевание',
-  'Д/з дыхание (КП)',
-  'Д/з упр с1-21',
-  'Д/з анкета и упр 27',
-  'Д/з фото после',
-  'Д/з ОПРОС',
-];
-
-// Module data starts at col 8, each module = 4 cols: hw, hw_comment, meeting, meeting_comment
-const MOD_START = 8;
-const MOD_SIZE = 4;
+/* ===== STATE ===== */
+const MONTH_SHORT = ['Янв','Фев','Мар','Апр','Май','Июн','Июл','Авг','Сен','Окт','Ноя','Дек'];
+const MODULE_NAMES = ['Модуль 1','Модуль 2','Модуль 3','Модуль 4','Модуль 5','Модуль 6','Модуль 7','Модуль 8'];
 
 let students = [];
-let notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}');
-let extra = JSON.parse(localStorage.getItem(EXTRA_KEY) || '{}');
 let curFilter = 'all';
 let curMonth = 'all';
 let curId = null;
-
-const MONTH_RU = ['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
-const MONTH_SHORT = ['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
-
-function parseMonth(dateStr) {
-  if (!dateStr) return null;
-  const s = dateStr.toLowerCase();
-  for (let i = 0; i < 12; i++) {
-    if (s.includes(MONTH_RU[i]) || s.includes(MONTH_SHORT[i])) return i;
-  }
-  const m = dateStr.match(/(\d{2})\.(\d{2})\.\d{4}/);
-  if (m) return parseInt(m[2]) - 1;
-  return null;
-}
-
-function detectTariff(rawName) {
-  const s = rawName.toLowerCase();
-  if (s.includes('айнур') || s.includes('ainur')) return 'ainur';
-  if (s.includes('индив') || s.includes('indiv')) return 'individual';
-  return 'group';
-}
-
-function saveNotes() { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); }
-function saveExtra() { localStorage.setItem(EXTRA_KEY, JSON.stringify(extra)); }
-function getExtra(id) { return extra[id] || {phone:'', telegram:'', curator:'', frozen:false}; }
-
-function extractPhone(raw) {
-  const m = raw.match(/[87]\d{10}/);
-  return m ? m[0] : '';
-}
+let editId = null;
+let selectedTariff = 'group';
+let selectedStatus = 'active';
+let editingModIdx = null;
 
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -270,200 +296,224 @@ function showScreen(id) {
   window.scrollTo(0, 0);
 }
 
-/* ===== PARSE CSV ===== */
-function parseCSV(text) {
-  const rows = [];
-  let cur = '', inQ = false, row = [];
-  for (let i = 0; i < text.length; i++) {
-    const c = text[i];
-    if (c === '"') { inQ = !inQ; }
-    else if (c === ',' && !inQ) { row.push(cur); cur = ''; }
-    else if ((c === '\n' || c === '\r') && !inQ) {
-      if (cur || row.length) { row.push(cur); rows.push(row); }
-      cur = ''; row = [];
-      if (c === '\r' && text[i+1] === '\n') i++;
-    } else { cur += c; }
-  }
-  if (cur || row.length) { row.push(cur); rows.push(row); }
-  return rows;
-}
+function closeSheet(id) { document.getElementById(id).classList.remove('show'); }
+function openSheet(id) { document.getElementById(id).classList.add('show'); }
 
-function extractName(raw) {
-  if (!raw) return '—';
-  // Remove phone number and everything after it
-  const cleaned = raw.replace(/\s*\d{10,12}.*/, '').replace(/\s+/g, ' ').trim();
-  return cleaned || raw.split(' ').slice(0,2).join(' ');
-}
-
-function parseBool(v) {
-  return v && v.trim().toUpperCase() === 'TRUE';
-}
-
-function parseStudents(csv) {
-  const rows = parseCSV(csv);
-  const result = [];
-  // Data starts at row index 3 (0-based)
-  for (let i = 3; i < rows.length; i++) {
-    const r = rows[i];
-    const numStr = (r[0] || '').trim();
-    const rawName = (r[1] || '').trim();
-    if (!rawName) continue;
-
-    const modules = [];
-    for (let m = 0; m < 8; m++) {
-      const base = MOD_START + m * MOD_SIZE;
-      modules.push({
-        name: MODULE_HW[m],
-        hwDone: parseBool(r[base]),
-        hwComment: (r[base + 1] || '').trim(),
-        meetingDone: parseBool(r[base + 2]),
-        meetingComment: (r[base + 3] || '').trim(),
-      });
+/* ===== LOAD ===== */
+async function loadStudents() {
+  document.getElementById('studentList').innerHTML = '<div class="loading"><div class="spinner"></div><span>Загрузка...</span></div>';
+  try {
+    const data = await sbGet('students', 'order=created_at.asc');
+    if (Array.isArray(data)) {
+      students = data;
+      document.getElementById('lastUpdated').textContent = 'Обновлено ' + new Date().toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
+      renderMonthFilters();
+      renderList();
+    } else {
+      throw new Error(JSON.stringify(data));
     }
-
-    const completedMods = modules.filter(m => m.hwDone && m.meetingDone).length;
-    const curMod = modules.findIndex(m => !m.hwDone || !m.meetingDone);
-
-    result.push({
-      id: 'row_' + i,
-      num: numStr,
-      rawName,
-      name: extractName(rawName),
-      comment: (r[2] || '').trim(),
-      startDate: (r[3] || '').trim(),
-      contractSigned: parseBool(r[4]),
-      hwPhoto: parseBool(r[5]),
-      generalComment: (r[6] || '').trim(),
-      problem: (r[7] || '').trim(),
-      modules,
-      completedMods,
-      currentModule: curMod === -1 ? 8 : curMod,
-      isDone: completedMods === 8,
-    });
+  } catch(e) {
+    document.getElementById('studentList').innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>Ошибка загрузки.<br>Проверь подключение.</p></div>';
+    document.getElementById('lastUpdated').textContent = 'Ошибка';
   }
-  return result;
-}
-
-/* ===== LOAD DATA ===== */
-async function loadData() {
-  document.getElementById('studentList').innerHTML = '<div class="loading"><div class="spinner"></div><span>Загружаю данные...</span></div>';
-  const urls = [
-    SHEET_CSV,
-    `https://corsproxy.io/?${encodeURIComponent('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv')}`,
-  ];
-  let text = null;
-  for (const url of urls) {
-    try {
-      const resp = await fetch(url + '&t=' + Date.now(), {cache:'no-store'});
-      if (resp.ok) { text = await resp.text(); break; }
-    } catch(e) { /* try next */ }
-  }
-  if (!text || !text.includes(',')) {
-    document.getElementById('studentList').innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>Не удалось загрузить данные.<br>Убедись что таблица открыта для просмотра и попробуй снова.</p></div>';
-    return;
-  }
-  students = parseStudents(text);
-  document.getElementById('lastUpdated').textContent = 'Обновлено: ' + new Date().toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
-  renderMonthFilters();
-  renderList();
-  toast('Данные загружены ✅');
 }
 
 /* ===== STATS ===== */
 function renderStats() {
   const total = students.length;
-  const done = students.filter(s => s.isDone).length;
-  const noMeeting = students.filter(s => {
-    const m = s.modules[s.currentModule > 0 ? s.currentModule - 1 : 0];
-    return !s.isDone && s.currentModule > 0 && !s.modules[s.currentModule > 0 ? s.currentModule-1 : 0].meetingDone;
-  }).length;
-  const active = total - done;
+  const active = students.filter(s => s.status === 'active').length;
+  const frozen = students.filter(s => s.status === 'frozen').length;
+  const done = students.filter(s => s.status === 'done').length;
   document.getElementById('statsBar').innerHTML = `
     <div class="stat-card"><div class="stat-num" style="color:var(--blue)">${total}</div><div class="stat-lbl">Всего</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:#F59E0B">${active}</div><div class="stat-lbl">В процессе</div></div>
-    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${done}</div><div class="stat-lbl">Завершили</div></div>`;
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${active}</div><div class="stat-lbl">Активных</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${frozen}</div><div class="stat-lbl">Заморожено</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--gray)">${done}</div><div class="stat-lbl">Завершили</div></div>`;
 }
 
-/* ===== FILTER & LIST ===== */
+/* ===== MONTH FILTERS ===== */
+function renderMonthFilters() {
+  const months = new Map();
+  students.forEach(s => {
+    if (s.start_date) {
+      const m = new Date(s.start_date).getMonth();
+      if (!isNaN(m)) months.set(m, (months.get(m)||0)+1);
+    }
+  });
+  const sorted = [...months.entries()].sort((a,b)=>a[0]-b[0]);
+  const el = document.getElementById('monthFilters');
+  if (!sorted.length) { el.innerHTML=''; return; }
+  el.innerHTML = '<button class="chip on" data-m="all" onclick="setMonth(\'all\')">📅 Все</button>' +
+    sorted.map(([m,c])=>`<button class="chip" data-m="${m}" onclick="setMonth('${m}')">${MONTH_SHORT[m]} (${c})</button>`).join('');
+}
+
+/* ===== FILTERS ===== */
 function setFilter(f) {
   curFilter = f;
   document.querySelectorAll('#statusFilters .chip').forEach(c => c.classList.toggle('on', c.dataset.f === f));
   renderList();
 }
-
 function setMonth(m) {
   curMonth = m;
-  document.querySelectorAll('#monthFilters .chip').forEach(c => c.classList.toggle('on', c.dataset.m === m));
+  document.querySelectorAll('#monthFilters .chip').forEach(c => c.classList.toggle('on', c.dataset.m === String(m)));
   renderList();
 }
 
-function renderMonthFilters() {
-  const months = new Map();
-  students.forEach(s => {
-    const m = parseMonth(s.startDate);
-    if (m !== null) months.set(m, (months.get(m) || 0) + 1);
-  });
-  const sorted = [...months.entries()].sort((a,b) => a[0]-b[0]);
-  const mf = document.getElementById('monthFilters');
-  if (sorted.length === 0) { mf.innerHTML = ''; return; }
-  mf.innerHTML = '<button class="chip on" data-m="all" onclick="setMonth(\'all\')">📅 Все месяцы</button>' +
-    sorted.map(([m, cnt]) => `<button class="chip" data-m="${m}" onclick="setMonth('${m}')">${MONTH_SHORT[m].charAt(0).toUpperCase()+MONTH_SHORT[m].slice(1)} (${cnt})</button>`).join('');
+function getModuleProgress(s) {
+  const mods = s.modules || [];
+  const completed = mods.filter(m => m.hw && m.meeting).length;
+  const current = mods.findIndex(m => !m.hw || !m.meeting);
+  return { completed, current: current === -1 ? mods.length : current };
 }
 
+/* ===== LIST ===== */
 function renderList() {
   renderStats();
   const q = document.getElementById('searchInput').value.toLowerCase().trim();
   let list = students;
-  if (q) list = list.filter(s => s.name.toLowerCase().includes(q) || s.rawName.toLowerCase().includes(q));
-  if (curFilter === 'active') list = list.filter(s => !s.isDone && !getExtra(s.id).frozen);
-  if (curFilter === 'frozen') list = list.filter(s => getExtra(s.id).frozen);
-  if (curFilter === 'done') list = list.filter(s => s.isDone);
-  if (curFilter === 'nomeeting') list = list.filter(s => {
-    if (s.isDone || getExtra(s.id).frozen) return false;
-    const cm = s.currentModule;
-    return cm > 0 && !s.modules[cm - 1].meetingDone;
-  });
-  const tariffFilters = ['group','individual','ainur'];
-  if (tariffFilters.includes(curFilter)) {
-    list = list.filter(s => {
-      const t = getExtra(s.id).tariff || detectTariff(s.rawName);
-      return t === curFilter;
-    });
-  }
+
+  if (q) list = list.filter(s => (s.name||'').toLowerCase().includes(q) || (s.curator||'').toLowerCase().includes(q) || (s.phone||'').includes(q));
+  if (curFilter === 'active') list = list.filter(s => s.status === 'active');
+  else if (curFilter === 'frozen') list = list.filter(s => s.status === 'frozen');
+  else if (curFilter === 'done') list = list.filter(s => s.status === 'done');
+  else if (['group','individual','ainur'].includes(curFilter)) list = list.filter(s => s.tariff === curFilter);
+
   if (curMonth !== 'all') {
-    list = list.filter(s => parseMonth(s.startDate) === parseInt(curMonth));
+    list = list.filter(s => s.start_date && new Date(s.start_date).getMonth() === parseInt(curMonth));
   }
 
   const el = document.getElementById('studentList');
-  if (list.length === 0) {
-    el.innerHTML = `<div class="empty"><div class="ei">🎓</div><p>${students.length === 0 ? 'Загрузка...' : 'Никого не найдено'}</p></div>`;
+  if (!list.length) {
+    el.innerHTML = `<div class="empty"><div class="ei">🎓</div><p>${!students.length ? 'Нет учеников. Нажми + чтобы добавить' : 'Никого не найдено'}</p></div>`;
     return;
   }
 
   el.innerHTML = list.map(s => {
-    const initials = s.name.split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
-    const dots = s.modules.map((m, i) => {
-      const cls = (m.hwDone && m.meetingDone) ? 'full' : m.hwDone ? 'hw' : (i === s.currentModule ? 'cur' : '');
+    const initials = (s.name||'?').split(' ').map(w=>w[0]||'').join('').slice(0,2).toUpperCase();
+    const prog = getModuleProgress(s);
+    const mods = s.modules || [];
+    const dots = Array.from({length:8},(_,i) => {
+      const m = mods[i];
+      const cls = m ? (m.hw&&m.meeting?'full':m.hw||m.meeting?'partial':'') : (i===prog.current?'cur':'');
       return `<div class="sc-dot ${cls}"></div>`;
     }).join('');
-    const ex = getExtra(s.id);
-    const phone = ex.phone || extractPhone(s.rawName);
-    const statusBadge = ex.frozen ? '<span class="badge badge-frozen">❄️ Заморожен</span>'
-      : s.isDone ? '<span class="badge badge-done">✅ Завершил</span>'
-      : `<span class="badge badge-active">Модуль ${s.currentModule + 1}/8</span>`;
-    const curator = ex.curator ? `<span style="font-size:11px;color:var(--muted)">👤 ${ex.curator}</span>` : '';
-    const tariff = ex.tariff || detectTariff(s.rawName);
-    const tariffLabel = tariff==='ainur' ? '⭐ Инд. с Айнур' : tariff==='individual' ? '👤 Инд.' : '👥 Группа';
+    const sb = s.status==='frozen'?'<span class="badge badge-frozen">❄️ Заморожен</span>'
+      : s.status==='done'?'<span class="badge badge-done">✅ Завершил</span>'
+      : `<span class="badge badge-active">${prog.completed}/8 модулей</span>`;
+    const tariffTxt = s.tariff==='ainur'?'⭐ Инд.Айнур':s.tariff==='individual'?'👤 Инд.':'👥 Группа';
     return `<div class="student-card" onclick="openProfile('${s.id}')">
-      <div class="sc-avatar" style="${ex.frozen?'background:#EFF6FF;color:#1D4ED8':''}">${ex.frozen?'❄️':initials}</div>
+      <div class="sc-avatar" style="${s.status==='frozen'?'background:#DBEAFE;color:#1D4ED8':''}">${s.status==='frozen'?'❄️':initials}</div>
       <div class="sc-body">
-        <div class="sc-name">${s.name}</div>
-        <div class="sc-sub" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">${statusBadge}<span style="font-size:11px;color:var(--muted)">${tariffLabel}</span>${curator}</div>
-        <div class="sc-progress" style="margin-top:6px">${dots}</div>
+        <div class="sc-name">${s.name||'—'}</div>
+        <div class="sc-sub">${sb}<span>${tariffTxt}</span>${s.curator?`<span>👤 ${s.curator}</span>`:''}</div>
+        <div class="sc-progress">${dots}</div>
       </div>
-      <div class="sc-arrow">›</div>
+      <div class="sc-arr">›</div>
     </div>`;
   }).join('');
+
+  // update curator datalist
+  const curators = [...new Set(students.map(s=>s.curator).filter(Boolean))];
+  document.getElementById('curatorList').innerHTML = curators.map(c=>`<option value="${c}">`).join('');
+}
+
+/* ===== ADD / EDIT STUDENT ===== */
+function openAdd() {
+  editId = null;
+  selectedTariff = 'group';
+  selectedStatus = 'active';
+  document.getElementById('sheetTitle').textContent = 'Новый ученик';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-phone').value = '';
+  document.getElementById('f-tg').value = '';
+  document.getElementById('f-curator').value = '';
+  document.getElementById('f-start').value = new Date().toISOString().slice(0,10);
+  document.getElementById('f-problem').value = '';
+  document.getElementById('f-progress').value = '';
+  document.getElementById('f-results').value = '';
+  document.getElementById('f-difficulties').value = '';
+  document.getElementById('deleteBtn').style.display = 'none';
+  setTariff('group'); setStatus('active');
+  openSheet('bd-student');
+  setTimeout(() => document.getElementById('f-name').focus(), 150);
+}
+
+function openEdit() {
+  const s = students.find(x => x.id === curId);
+  if (!s) return;
+  editId = s.id;
+  selectedTariff = s.tariff || 'group';
+  selectedStatus = s.status || 'active';
+  document.getElementById('sheetTitle').textContent = 'Редактировать';
+  document.getElementById('f-name').value = s.name || '';
+  document.getElementById('f-phone').value = s.phone || '';
+  document.getElementById('f-tg').value = s.telegram || '';
+  document.getElementById('f-curator').value = s.curator || '';
+  document.getElementById('f-start').value = s.start_date || '';
+  document.getElementById('f-problem').value = s.problem || '';
+  document.getElementById('f-progress').value = s.progress || '';
+  document.getElementById('f-results').value = s.results || '';
+  document.getElementById('f-difficulties').value = s.difficulties || '';
+  document.getElementById('deleteBtn').style.display = 'block';
+  setTariff(selectedTariff); setStatus(selectedStatus);
+  openSheet('bd-student');
+}
+
+function setTariff(t) {
+  selectedTariff = t;
+  document.querySelectorAll('#tariffSeg button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+}
+function setStatus(s) {
+  selectedStatus = s;
+  document.querySelectorAll('#statusSeg button').forEach(b => b.classList.toggle('on', b.dataset.s === s));
+}
+
+async function saveStudent() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { toast('Введи имя ученика'); return; }
+  const btn = document.getElementById('saveBtn');
+  btn.textContent = 'Сохраняю...'; btn.disabled = true;
+  const data = {
+    name,
+    phone: document.getElementById('f-phone').value.trim(),
+    telegram: document.getElementById('f-tg').value.trim(),
+    curator: document.getElementById('f-curator').value.trim(),
+    tariff: selectedTariff,
+    status: selectedStatus,
+    start_date: document.getElementById('f-start').value || null,
+    problem: document.getElementById('f-problem').value.trim(),
+    progress: document.getElementById('f-progress').value.trim(),
+    results: document.getElementById('f-results').value.trim(),
+    difficulties: document.getElementById('f-difficulties').value.trim(),
+  };
+  try {
+    if (editId) {
+      await sbUpdate('students', editId, data);
+      toast('Сохранено ✅');
+    } else {
+      data.modules = [];
+      await sbInsert('students', data);
+      toast('Ученик добавлен ✅');
+      if (tg) tg.HapticFeedback.notificationOccurred('success');
+    }
+    closeSheet('bd-student');
+    await loadStudents();
+    if (editId) { openProfile(editId); }
+  } catch(e) {
+    toast('Ошибка сохранения');
+  }
+  btn.textContent = 'Сохранить'; btn.disabled = false;
+}
+
+async function deleteStudent() {
+  const doIt = async () => {
+    await sbDelete('students', curId);
+    showScreen('s-list');
+    await loadStudents();
+    toast('Ученик удалён');
+  };
+  if (tg) tg.showConfirm('Удалить ученика?', ok => { if(ok) doIt(); });
+  else if (confirm('Удалить?')) doIt();
 }
 
 /* ===== PROFILE ===== */
@@ -471,142 +521,135 @@ function openProfile(id) {
   curId = id;
   const s = students.find(x => x.id === id);
   if (!s) return;
-  document.getElementById('phName').textContent = s.name;
-  document.getElementById('phSub').textContent = `Старт: ${s.startDate || '—'}`;
-  const ex = getExtra(s.id);
-  const statusBadge = ex.frozen ? '❄️ Заморожен' : s.isDone ? '✅ Завершил курс' : `📍 Модуль ${s.currentModule + 1} из 8`;
+  const prog = getModuleProgress(s);
+  document.getElementById('phName').textContent = s.name || '—';
+  document.getElementById('phSub').textContent = [s.curator ? '👤 '+s.curator : '', s.start_date ? 'с '+fmtDate(s.start_date) : ''].filter(Boolean).join(' · ') || '—';
+  const sb = s.status==='frozen'?'❄️ Заморожен':s.status==='done'?'✅ Завершил курс':`📍 ${prog.completed}/8 модулей`;
   document.getElementById('phBadges').innerHTML =
-    `<span class="ph-badge">${statusBadge}</span>` +
-    `<span class="ph-badge">${s.completedMods} из 8 пройдено</span>` +
-    (ex.curator ? `<span class="ph-badge">👤 ${ex.curator}</span>` : '') +
-    `<span class="ph-badge" onclick="openContacts()" style="cursor:pointer">✏️ Контакты</span>`;
+    `<span class="ph-badge">${sb}</span>` +
+    (s.tariff==='ainur'?'<span class="ph-badge">⭐ Инд.Айнур</span>':s.tariff==='individual'?'<span class="ph-badge">👤 Инд.куратор</span>':'<span class="ph-badge">👥 Группа</span>') +
+    `<span class="ph-badge" onclick="openEdit()" style="cursor:pointer">✏️ Изменить</span>`;
   showScreen('s-profile');
   switchTab('info');
 }
 
 function switchTab(t) {
-  document.querySelectorAll('.tab').forEach((b, i) => b.classList.toggle('on', ['info','modules','notes'][i] === t));
+  document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('on', ['info','modules','notes'][i]===t));
   document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('on'));
-  document.getElementById('tab-' + t).classList.add('on');
-  if (t === 'info') renderTabInfo();
-  if (t === 'modules') renderTabModules();
-  if (t === 'notes') renderTabNotes();
+  document.getElementById('tab-'+t).classList.add('on');
+  if (t==='info') renderInfo();
+  if (t==='modules') renderModules();
+  if (t==='notes') renderNotes();
 }
 
-function renderTabInfo() {
+function fmtDate(ds) {
+  if (!ds) return '—';
+  const d = new Date(ds);
+  if (isNaN(d)) return ds;
+  return d.toLocaleDateString('ru-RU', {day:'numeric',month:'long'});
+}
+
+function renderInfo() {
   const s = students.find(x => x.id === curId);
   if (!s) return;
-  const ex2 = getExtra(s.id);
-  const phone = ex2.phone || extractPhone(s.rawName);
-  const tgLink = ex2.telegram ? `<a href="https://t.me/${ex2.telegram.replace('@','')}" style="color:var(--blue);text-decoration:none">${ex2.telegram}</a>` : '—';
+  const tgLink = s.telegram ? `<a href="https://t.me/${s.telegram.replace('@','')}" style="color:var(--blue)">${s.telegram}</a>` : '—';
   document.getElementById('tab-info').innerHTML = `
     <div class="info-card">
       <h4>Контакты</h4>
-      ${irow('Телефон', phone ? `<a href="tel:${phone}" style="color:var(--blue);text-decoration:none">${phone}</a>` : '—')}
+      ${irow('Телефон', s.phone ? `<a href="tel:${s.phone}" style="color:var(--blue)">${s.phone}</a>` : '—')}
       ${irow('Telegram', tgLink)}
-      ${irow('Куратор', ex2.curator || '—')}
-      ${irow('Статус', ex2.frozen ? '❄️ Заморожен' : s.isDone ? '✅ Завершил' : '🟢 Активен')}
-      <button onclick="openContacts()" style="margin-top:10px;width:100%;padding:10px;border:1.5px dashed var(--gray-m);border-radius:10px;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;">✏️ Редактировать контакты</button>
+      ${irow('Куратор', s.curator || '—')}
+      ${irow('Тариф', s.tariff==='ainur'?'⭐ Инд. с Айнур':s.tariff==='individual'?'👤 Инд. с куратором':'👥 В группе')}
     </div>
     <div class="info-card">
       <h4>Курс</h4>
-      ${irow('Дата старта', s.startDate || '—')}
-      ${irow('Договор подписан', s.contractSigned ? '✅ Да' : '❌ Нет')}
-      ${irow('Фото-протокол', s.hwPhoto ? '✅ Сдан' : '❌ Нет')}
-      ${irow('Пройдено модулей', `${s.completedMods} из 8`)}
+      ${irow('Дата входа', fmtDate(s.start_date))}
+      ${irow('Статус', s.status==='frozen'?'❄️ Заморожен':s.status==='done'?'✅ Завершил':'🟢 Активен')}
+      ${irow('Этап', s.progress || '—')}
     </div>
     ${s.problem ? `<div class="info-card"><h4>С чем пришёл</h4><p class="ir-text">${s.problem}</p></div>` : ''}
-    ${s.generalComment ? `<div class="info-card"><h4>Комментарий</h4><p class="ir-text">${s.generalComment}</p></div>` : ''}
-    ${s.comment ? `<div class="info-card"><h4>Доп. информация</h4><p class="ir-text">${s.comment}</p></div>` : ''}
-    <div class="info-card">
-      <h4>Полные данные</h4>
-      <p class="ir-text" style="color:var(--muted);font-size:12px;">${s.rawName}</p>
-    </div>`;
+    ${s.results ? `<div class="info-card"><h4>Результаты</h4><p class="ir-text">${s.results}</p></div>` : ''}
+    ${s.difficulties ? `<div class="info-card"><h4>Сложности</h4><p class="ir-text">${s.difficulties}</p></div>` : ''}`;
 }
 
-function irow(label, val) {
-  return `<div class="info-row"><div class="ir-lbl">${label}</div><div class="ir-val">${val}</div></div>`;
-}
+function irow(l, v) { return `<div class="info-row"><div class="ir-lbl">${l}</div><div class="ir-val">${v}</div></div>`; }
 
-function renderTabModules() {
+function renderModules() {
   const s = students.find(x => x.id === curId);
   if (!s) return;
-  document.getElementById('tab-modules').innerHTML = s.modules.map((m, i) => {
-    const isCurrent = i === s.currentModule && !s.isDone;
-    const isComplete = m.hwDone && m.meetingDone;
-    const statusCls = isComplete ? 'ms-full' : isCurrent ? 'ms-cur' : m.hwDone ? 'ms-hw' : 'ms-none';
-    const statusTxt = isComplete ? '✅ Пройден' : isCurrent ? '🔵 Текущий' : m.hwDone ? '📝 ДЗ сдано' : '⬜ Не начат';
+  const mods = s.modules || [];
+  document.getElementById('tab-modules').innerHTML = MODULE_NAMES.map((name, i) => {
+    const m = mods[i] || {};
+    const prog = getModuleProgress(s);
+    const isCur = i === prog.current && s.status === 'active';
+    const isFull = m.hw && m.meeting;
+    const sc = isFull ? 'ms-full' : isCur ? 'ms-cur' : (m.hw||m.meeting) ? 'ms-partial' : 'ms-none';
+    const st = isFull ? '✅ Пройден' : isCur ? '🔵 Текущий' : (m.hw||m.meeting) ? '📝 В процессе' : '⬜ Не начат';
     return `<div class="module-item">
-      <div class="module-hdr">
-        <div class="module-name">Модуль ${i + 1}</div>
-        <span class="module-status ${statusCls}">${statusTxt}</span>
-      </div>
-      <div class="module-row"><span class="mcheck">${m.hwDone ? '✅' : '⬜'}</span><span class="module-sub">${m.name}</span></div>
-      ${m.hwComment ? `<div class="module-comment">💬 ${m.hwComment}</div>` : ''}
-      <div class="module-row" style="margin-top:4px"><span class="mcheck">${m.meetingDone ? '✅' : '⬜'}</span><span class="module-sub">Созвон проведён</span></div>
-      ${m.meetingComment ? `<div class="module-comment">💬 ${m.meetingComment}</div>` : ''}
+      <div class="module-hdr"><div class="module-name">${name}</div><span class="module-status ${sc}">${st}</span></div>
+      <div class="module-row" onclick="toggleModule(${i},'hw')"><span class="mcheck">${m.hw?'✅':'⬜'}</span><span class="module-sub">Домашнее задание сдано</span></div>
+      <div class="module-row" onclick="toggleModule(${i},'meeting')"><span class="mcheck">${m.meeting?'✅':'⬜'}</span><span class="module-sub">Созвон проведён</span></div>
+      ${m.comment ? `<div class="module-comment">💬 ${m.comment}</div>` : ''}
+      <button class="add-note-btn" onclick="openModuleNote(${i})">${m.comment ? '✏️ Изменить заметку' : '+ Добавить заметку'}</button>
     </div>`;
   }).join('');
 }
 
-function renderTabNotes() {
-  const note = notes[curId] || '';
-  document.getElementById('tab-notes').innerHTML = `
-    <div class="note-area">
-      <h4>Личные заметки куратора</h4>
-      <textarea id="noteText" placeholder="Заметки видны только тебе — сложности, договорённости, наблюдения...">${note}</textarea>
-      <button class="note-save" onclick="saveNote()">Сохранить</button>
-    </div>
-    <p style="font-size:12px;color:var(--muted);text-align:center;">Заметки хранятся на этом устройстве</p>`;
-}
-
-function saveNote() {
-  notes[curId] = document.getElementById('noteText').value;
-  saveNotes();
-  toast('Заметка сохранена ✅');
-  if (tg) tg.HapticFeedback.notificationOccurred('success');
-}
-
-/* ===== CONTACTS SHEET ===== */
-let frozenState = false;
-function openContacts() {
-  const ex = getExtra(curId);
+async function toggleModule(idx, field) {
   const s = students.find(x => x.id === curId);
-  document.getElementById('ex-phone').value = ex.phone || extractPhone(s ? s.rawName : '');
-  document.getElementById('ex-tg').value = ex.telegram || '';
-  document.getElementById('ex-curator').value = ex.curator || '';
-  document.getElementById('ex-tariff').value = ex.tariff || detectTariff(s ? s.rawName : '');
-  frozenState = !!ex.frozen;
-  updateFrozenToggle();
-  document.getElementById('bd-contacts').style.display = 'flex';
+  if (!s) return;
+  const mods = [...(s.modules || [])];
+  while (mods.length <= idx) mods.push({});
+  mods[idx] = { ...mods[idx], [field]: !mods[idx][field] };
+  await sbUpdate('students', curId, { modules: mods });
+  s.modules = mods;
+  renderModules();
+  if (tg) tg.HapticFeedback.impactOccurred('light');
 }
-function closeContacts() { document.getElementById('bd-contacts').style.display = 'none'; }
-function toggleFrozen() { frozenState = !frozenState; updateFrozenToggle(); }
-function updateFrozenToggle() {
-  const toggle = document.getElementById('frozenToggle');
-  const knob = document.getElementById('frozenKnob');
-  toggle.style.background = frozenState ? '#3B82F6' : 'var(--gray-m)';
-  knob.style.left = frozenState ? '20px' : '2px';
+
+function openModuleNote(idx) {
+  editingModIdx = idx;
+  const s = students.find(x => x.id === curId);
+  const mods = s.modules || [];
+  document.getElementById('moduleSheetTitle').textContent = `Заметка — Модуль ${idx+1}`;
+  document.getElementById('mod-comment').value = (mods[idx]||{}).comment || '';
+  openSheet('bd-module');
 }
-function saveContacts() {
-  extra[curId] = {
-    phone: document.getElementById('ex-phone').value.trim(),
-    telegram: document.getElementById('ex-tg').value.trim(),
-    curator: document.getElementById('ex-curator').value.trim(),
-    tariff: document.getElementById('ex-tariff').value,
-    frozen: frozenState,
-  };
-  saveExtra();
-  closeContacts();
-  renderProfile(curId);
-  renderTabInfo();
-  renderList();
-  toast('Контакты сохранены ✅');
+
+async function saveModuleComment() {
+  const s = students.find(x => x.id === curId);
+  const mods = [...(s.modules || [])];
+  while (mods.length <= editingModIdx) mods.push({});
+  mods[editingModIdx] = { ...mods[editingModIdx], comment: document.getElementById('mod-comment').value.trim() };
+  await sbUpdate('students', curId, { modules: mods });
+  s.modules = mods;
+  closeSheet('bd-module');
+  renderModules();
+  toast('Заметка сохранена ✅');
+}
+
+function renderNotes() {
+  const s = students.find(x => x.id === curId);
+  if (!s) return;
+  document.getElementById('tab-notes').innerHTML = `
+    <div class="info-card">
+      <h4>Общие заметки куратора</h4>
+      <textarea id="notesText" placeholder="Наблюдения, договорённости, важные детали..." style="width:100%;border:1.5px solid var(--gray-m);border-radius:10px;padding:10px;font-family:inherit;font-size:13px;min-height:100px;outline:none;">${s.notes||''}</textarea>
+      <button onclick="saveNotes()" style="margin-top:8px;padding:9px 16px;background:var(--blue);color:#fff;border:none;border-radius:9px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">Сохранить</button>
+    </div>`;
+}
+
+async function saveNotes() {
+  const notes = document.getElementById('notesText').value;
+  await sbUpdate('students', curId, { notes });
+  const s = students.find(x => x.id === curId);
+  if (s) s.notes = notes;
+  toast('Заметки сохранены ✅');
   if (tg) tg.HapticFeedback.notificationOccurred('success');
 }
 
 /* ===== INIT ===== */
-loadData();
+loadStudents();
 </script>
 </body>
 </html>
