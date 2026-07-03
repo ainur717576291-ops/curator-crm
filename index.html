@@ -167,7 +167,8 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
 const tg = window.Telegram && window.Telegram.WebApp;
 if (tg) { tg.ready(); tg.expand(); }
 
-const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/1cD9jLk-9jYowr4NWpcJxpNi3Sgkrf5pE-pQ5PiGvsbM/export?format=csv';
+const SHEET_ID = '1cD9jLk-9jYowr4NWpcJxpNi3Sgkrf5pE-pQ5PiGvsbM';
+const SHEET_CSV = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv')}`;
 const NOTES_KEY = 'crm_notes_v1';
 
 const MODULE_HW = [
@@ -282,16 +283,25 @@ function parseStudents(csv) {
 /* ===== LOAD DATA ===== */
 async function loadData() {
   document.getElementById('studentList').innerHTML = '<div class="loading"><div class="spinner"></div><span>Загружаю данные...</span></div>';
-  try {
-    const resp = await fetch(SHEET_CSV + '&t=' + Date.now());
-    const text = await resp.text();
-    students = parseStudents(text);
-    document.getElementById('lastUpdated').textContent = 'Обновлено: ' + new Date().toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
-    renderList();
-    toast('Данные загружены ✅');
-  } catch(e) {
-    document.getElementById('studentList').innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>Не удалось загрузить данные.<br>Проверь интернет и попробуй снова.</p></div>';
+  const urls = [
+    SHEET_CSV,
+    `https://corsproxy.io/?${encodeURIComponent('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv')}`,
+  ];
+  let text = null;
+  for (const url of urls) {
+    try {
+      const resp = await fetch(url + '&t=' + Date.now(), {cache:'no-store'});
+      if (resp.ok) { text = await resp.text(); break; }
+    } catch(e) { /* try next */ }
   }
+  if (!text || !text.includes(',')) {
+    document.getElementById('studentList').innerHTML = '<div class="empty"><div class="ei">⚠️</div><p>Не удалось загрузить данные.<br>Убедись что таблица открыта для просмотра и попробуй снова.</p></div>';
+    return;
+  }
+  students = parseStudents(text);
+  document.getElementById('lastUpdated').textContent = 'Обновлено: ' + new Date().toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
+  renderList();
+  toast('Данные загружены ✅');
 }
 
 /* ===== STATS ===== */
