@@ -136,6 +136,7 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
     <div class="filters">
       <button class="chip on" data-f="all" onclick="setFilter('all')">Все</button>
       <button class="chip" data-f="active" onclick="setFilter('active')">В процессе</button>
+      <button class="chip" data-f="frozen" onclick="setFilter('frozen')">❄️ Заморожены</button>
       <button class="chip" data-f="done" onclick="setFilter('done')">Завершили</button>
       <button class="chip" data-f="nomeeting" onclick="setFilter('nomeeting')">Нет созвона</button>
     </div>
@@ -161,6 +162,27 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
   <div class="tab-content" id="tab-notes"></div>
 </div>
 
+<!-- SHEET: EDIT CONTACTS -->
+<div style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:none;align-items:flex-end;justify-content:center;" id="bd-contacts" onclick="if(event.target===this)closeContacts()">
+<div style="width:100%;max-width:480px;background:#fff;border-radius:24px 24px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));animation:slideUp .28s ease;">
+  <h3 style="font-size:18px;font-weight:700;margin-bottom:16px;">Контакты и куратор</h3>
+  <div class="fld"><label>Телефон</label><input id="ex-phone" type="tel" placeholder="87001234567"></div>
+  <div class="fld"><label>Ник в Telegram</label><input id="ex-tg" placeholder="@username"></div>
+  <div class="fld"><label>Куратор</label><input id="ex-curator" placeholder="Имя куратора"></div>
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;padding:12px;background:var(--gray-l);border-radius:12px;cursor:pointer;" onclick="toggleFrozen()">
+    <div id="frozenToggle" style="width:44px;height:26px;border-radius:13px;background:var(--gray-m);position:relative;transition:.2s;flex-shrink:0;">
+      <div style="width:22px;height:22px;border-radius:11px;background:#fff;position:absolute;top:2px;left:2px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);" id="frozenKnob"></div>
+    </div>
+    <div>
+      <div style="font-size:14px;font-weight:600;">❄️ Заморожен</div>
+      <div style="font-size:12px;color:var(--muted);">Участник приостановил курс</div>
+    </div>
+  </div>
+  <button onclick="saveContacts()" style="width:100%;background:var(--blue);color:#fff;border:none;border-radius:13px;padding:14px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;">Сохранить</button>
+  <button onclick="closeContacts()" style="width:100%;background:none;color:var(--muted);border:none;padding:10px;font-family:inherit;font-size:13px;cursor:pointer;margin-top:4px;">Отмена</button>
+</div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -170,6 +192,7 @@ if (tg) { tg.ready(); tg.expand(); }
 const SHEET_ID = '1cD9jLk-9jYowr4NWpcJxpNi3Sgkrf5pE-pQ5PiGvsbM';
 const SHEET_CSV = `https://api.allorigins.win/raw?url=${encodeURIComponent('https://docs.google.com/spreadsheets/d/' + SHEET_ID + '/export?format=csv')}`;
 const NOTES_KEY = 'crm_notes_v1';
+const EXTRA_KEY = 'crm_extra_v1'; // phone, telegram, curator, frozen
 
 const MODULE_HW = [
   'Д/з глоток воды',
@@ -188,10 +211,18 @@ const MOD_SIZE = 4;
 
 let students = [];
 let notes = JSON.parse(localStorage.getItem(NOTES_KEY) || '{}');
+let extra = JSON.parse(localStorage.getItem(EXTRA_KEY) || '{}');
 let curFilter = 'all';
 let curId = null;
 
 function saveNotes() { localStorage.setItem(NOTES_KEY, JSON.stringify(notes)); }
+function saveExtra() { localStorage.setItem(EXTRA_KEY, JSON.stringify(extra)); }
+function getExtra(id) { return extra[id] || {phone:'', telegram:'', curator:'', frozen:false}; }
+
+function extractPhone(raw) {
+  const m = raw.match(/[87]\d{10}/);
+  return m ? m[0] : '';
+}
 
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -331,10 +362,11 @@ function renderList() {
   const q = document.getElementById('searchInput').value.toLowerCase().trim();
   let list = students;
   if (q) list = list.filter(s => s.name.toLowerCase().includes(q) || s.rawName.toLowerCase().includes(q));
-  if (curFilter === 'active') list = list.filter(s => !s.isDone);
+  if (curFilter === 'active') list = list.filter(s => !s.isDone && !getExtra(s.id).frozen);
+  if (curFilter === 'frozen') list = list.filter(s => getExtra(s.id).frozen);
   if (curFilter === 'done') list = list.filter(s => s.isDone);
   if (curFilter === 'nomeeting') list = list.filter(s => {
-    if (s.isDone) return false;
+    if (s.isDone || getExtra(s.id).frozen) return false;
     const cm = s.currentModule;
     return cm > 0 && !s.modules[cm - 1].meetingDone;
   });
@@ -351,15 +383,18 @@ function renderList() {
       const cls = (m.hwDone && m.meetingDone) ? 'full' : m.hwDone ? 'hw' : (i === s.currentModule ? 'cur' : '');
       return `<div class="sc-dot ${cls}"></div>`;
     }).join('');
-    const statusBadge = s.isDone
-      ? '<span class="badge badge-done">✅ Завершил</span>'
-      : `<span class="badge badge-active">Модуль ${s.currentModule + 1} из 8</span>`;
+    const ex = getExtra(s.id);
+    const phone = ex.phone || extractPhone(s.rawName);
+    const statusBadge = ex.frozen ? '<span class="badge badge-frozen">❄️ Заморожен</span>'
+      : s.isDone ? '<span class="badge badge-done">✅ Завершил</span>'
+      : `<span class="badge badge-active">Модуль ${s.currentModule + 1}/8</span>`;
+    const curator = ex.curator ? `<span style="font-size:11px;color:var(--muted)">👤 ${ex.curator}</span>` : '';
     return `<div class="student-card" onclick="openProfile('${s.id}')">
-      <div class="sc-avatar">${initials}</div>
+      <div class="sc-avatar" style="${ex.frozen?'background:#EFF6FF;color:#1D4ED8':''}">${ex.frozen?'❄️':initials}</div>
       <div class="sc-body">
         <div class="sc-name">${s.name}</div>
-        <div class="sc-sub">Старт: ${s.startDate || '—'} · ${statusBadge}</div>
-        <div class="sc-progress">${dots}</div>
+        <div class="sc-sub" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">${statusBadge}${curator}</div>
+        <div class="sc-progress" style="margin-top:6px">${dots}</div>
       </div>
       <div class="sc-arrow">›</div>
     </div>`;
@@ -373,11 +408,13 @@ function openProfile(id) {
   if (!s) return;
   document.getElementById('phName').textContent = s.name;
   document.getElementById('phSub').textContent = `Старт: ${s.startDate || '—'}`;
-  const statusBadge = s.isDone ? '✅ Завершил курс' : `📍 Модуль ${s.currentModule + 1} из 8`;
+  const ex = getExtra(s.id);
+  const statusBadge = ex.frozen ? '❄️ Заморожен' : s.isDone ? '✅ Завершил курс' : `📍 Модуль ${s.currentModule + 1} из 8`;
   document.getElementById('phBadges').innerHTML =
     `<span class="ph-badge">${statusBadge}</span>` +
-    `<span class="ph-badge">${s.completedMods} модулей пройдено</span>` +
-    (s.contractSigned ? '<span class="ph-badge">📄 Договор</span>' : '');
+    `<span class="ph-badge">${s.completedMods} из 8 пройдено</span>` +
+    (ex.curator ? `<span class="ph-badge">👤 ${ex.curator}</span>` : '') +
+    `<span class="ph-badge" onclick="openContacts()" style="cursor:pointer">✏️ Контакты</span>`;
   showScreen('s-profile');
   switchTab('info');
 }
@@ -394,9 +431,20 @@ function switchTab(t) {
 function renderTabInfo() {
   const s = students.find(x => x.id === curId);
   if (!s) return;
+  const ex2 = getExtra(s.id);
+  const phone = ex2.phone || extractPhone(s.rawName);
+  const tgLink = ex2.telegram ? `<a href="https://t.me/${ex2.telegram.replace('@','')}" style="color:var(--blue);text-decoration:none">${ex2.telegram}</a>` : '—';
   document.getElementById('tab-info').innerHTML = `
     <div class="info-card">
-      <h4>Основное</h4>
+      <h4>Контакты</h4>
+      ${irow('Телефон', phone ? `<a href="tel:${phone}" style="color:var(--blue);text-decoration:none">${phone}</a>` : '—')}
+      ${irow('Telegram', tgLink)}
+      ${irow('Куратор', ex2.curator || '—')}
+      ${irow('Статус', ex2.frozen ? '❄️ Заморожен' : s.isDone ? '✅ Завершил' : '🟢 Активен')}
+      <button onclick="openContacts()" style="margin-top:10px;width:100%;padding:10px;border:1.5px dashed var(--gray-m);border-radius:10px;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;">✏️ Редактировать контакты</button>
+    </div>
+    <div class="info-card">
+      <h4>Курс</h4>
       ${irow('Дата старта', s.startDate || '—')}
       ${irow('Договор подписан', s.contractSigned ? '✅ Да' : '❌ Нет')}
       ${irow('Фото-протокол', s.hwPhoto ? '✅ Сдан' : '❌ Нет')}
@@ -451,6 +499,42 @@ function saveNote() {
   notes[curId] = document.getElementById('noteText').value;
   saveNotes();
   toast('Заметка сохранена ✅');
+  if (tg) tg.HapticFeedback.notificationOccurred('success');
+}
+
+/* ===== CONTACTS SHEET ===== */
+let frozenState = false;
+function openContacts() {
+  const ex = getExtra(curId);
+  const s = students.find(x => x.id === curId);
+  document.getElementById('ex-phone').value = ex.phone || extractPhone(s ? s.rawName : '');
+  document.getElementById('ex-tg').value = ex.telegram || '';
+  document.getElementById('ex-curator').value = ex.curator || '';
+  frozenState = !!ex.frozen;
+  updateFrozenToggle();
+  document.getElementById('bd-contacts').style.display = 'flex';
+}
+function closeContacts() { document.getElementById('bd-contacts').style.display = 'none'; }
+function toggleFrozen() { frozenState = !frozenState; updateFrozenToggle(); }
+function updateFrozenToggle() {
+  const toggle = document.getElementById('frozenToggle');
+  const knob = document.getElementById('frozenKnob');
+  toggle.style.background = frozenState ? '#3B82F6' : 'var(--gray-m)';
+  knob.style.left = frozenState ? '20px' : '2px';
+}
+function saveContacts() {
+  extra[curId] = {
+    phone: document.getElementById('ex-phone').value.trim(),
+    telegram: document.getElementById('ex-tg').value.trim(),
+    curator: document.getElementById('ex-curator').value.trim(),
+    frozen: frozenState,
+  };
+  saveExtra();
+  closeContacts();
+  renderProfile(curId);
+  renderTabInfo();
+  renderList();
+  toast('Контакты сохранены ✅');
   if (tg) tg.HapticFeedback.notificationOccurred('success');
 }
 
