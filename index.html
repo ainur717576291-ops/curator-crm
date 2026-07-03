@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Курс: Кураторы</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#3B82F6;--blue-d:#2563EB;--blue-l:#EFF6FF;
+  --green:#22C55E;--green-l:#F0FDF4;
+  --amber:#F59E0B;--amber-l:#FFFBEB;
+  --red:#EF4444;--red-l:#FEF2F2;
+  --gray:#6B7280;--gray-l:#F9FAFB;--gray-m:#E5E7EB;
+  --ink:#111827;--muted:#6B7280;
+  --card:#fff;--bg:#F3F4F6;
+  --shadow:0 1px 3px rgba(0,0,0,.1),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 6px rgba(0,0,0,.07),0 2px 4px rgba(0,0,0,.06);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;margin:0;padding:0;}
+html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;}
+body{padding-bottom:env(safe-area-inset-bottom);}
+
+/* ---- SCREENS ---- */
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ---- HEADER ---- */
+.hdr{background:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--gray-m);position:sticky;top:0;z-index:10;padding-top:calc(14px + env(safe-area-inset-top));}
+.hdr-back{width:36px;height:36px;border-radius:10px;background:var(--gray-l);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:18px;flex-shrink:0;}
+.hdr-title{font-size:17px;font-weight:700;flex:1;}
+.hdr-action{width:36px;height:36px;border-radius:10px;background:var(--blue);border:none;color:#fff;font-size:20px;font-weight:300;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;}
+
+/* ---- CONTENT ---- */
+.content{flex:1;padding:16px;overflow-y:auto;}
+
+/* ---- SEARCH + FILTERS ---- */
+.search-wrap{position:relative;margin-bottom:12px;}
+.search-wrap input{width:100%;padding:10px 14px 10px 38px;border:1.5px solid var(--gray-m);border-radius:12px;font-family:inherit;font-size:14px;color:var(--ink);background:#fff;outline:none;}
+.search-wrap input:focus{border-color:var(--blue);}
+.search-wrap .si{position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;}
+.filters{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:14px;scrollbar-width:none;}
+.filters::-webkit-scrollbar{display:none;}
+.chip{border:1.5px solid var(--gray-m);background:#fff;border-radius:20px;padding:6px 14px;font-family:inherit;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;white-space:nowrap;flex-shrink:0;}
+.chip.on{border-color:var(--blue);background:var(--blue-l);color:var(--blue-d);}
+
+/* ---- STUDENT CARDS ---- */
+.student-card{background:var(--card);border-radius:16px;padding:14px;margin-bottom:10px;box-shadow:var(--shadow);cursor:pointer;display:flex;align-items:center;gap:12px;transition:box-shadow .15s;}
+.student-card:active{box-shadow:none;}
+.sc-avatar{width:44px;height:44px;border-radius:14px;background:var(--blue-l);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:var(--blue-d);flex-shrink:0;}
+.sc-body{flex:1;min-width:0;}
+.sc-name{font-size:15px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sc-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+.sc-badges{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px;}
+.badge-active{background:var(--green-l);color:#15803D;}
+.badge-frozen{background:#EFF6FF;color:#1D4ED8;}
+.badge-done{background:var(--gray-l);color:var(--gray);}
+.badge-hw{background:var(--amber-l);color:#B45309;}
+.sc-arrow{color:var(--gray-m);font-size:18px;}
+
+/* ---- EMPTY STATE ---- */
+.empty{text-align:center;padding:48px 24px;color:var(--muted);}
+.empty .ei{font-size:48px;margin-bottom:12px;}
+.empty p{font-size:14px;line-height:1.5;}
+
+/* ---- PROFILE ---- */
+.profile-hero{background:linear-gradient(135deg,#1e3a5f,#2563EB);color:#fff;padding:20px 16px 24px;padding-top:calc(20px + env(safe-area-inset-top));}
+.ph-name{font-size:22px;font-weight:800;margin-bottom:4px;}
+.ph-sub{font-size:13px;opacity:.8;}
+.ph-badges{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+.ph-badge{padding:5px 12px;border-radius:10px;font-size:12px;font-weight:600;background:rgba(255,255,255,.18);}
+
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--gray-m);position:sticky;top:0;z-index:5;}
+.tab{flex:1;padding:12px 4px;border:none;background:none;font-family:inherit;font-size:13px;font-weight:600;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:.2s;}
+.tab.on{color:var(--blue-d);border-bottom-color:var(--blue);}
+
+.tab-content{display:none;padding:16px;}
+.tab-content.on{display:block;}
+
+/* ---- INFO FIELDS ---- */
+.info-section{background:#fff;border-radius:16px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow);}
+.info-section h4{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--gray-l);}
+.info-row:last-child{border-bottom:none;padding-bottom:0;}
+.ir-label{font-size:13px;color:var(--muted);flex-shrink:0;margin-right:12px;}
+.ir-val{font-size:13px;font-weight:500;text-align:right;word-break:break-word;}
+
+/* ---- CALL LOG ---- */
+.call-item{background:#fff;border-radius:14px;padding:12px;margin-bottom:8px;box-shadow:var(--shadow);}
+.call-date{font-size:12px;color:var(--muted);margin-bottom:4px;}
+.call-note{font-size:14px;line-height:1.5;}
+.add-btn{width:100%;padding:13px;border:2px dashed var(--gray-m);border-radius:14px;background:none;font-family:inherit;font-size:14px;font-weight:600;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;}
+.add-btn:active{background:var(--gray-l);}
+
+/* ---- HOMEWORK ---- */
+.hw-item{background:#fff;border-radius:14px;padding:12px;margin-bottom:8px;box-shadow:var(--shadow);display:flex;align-items:center;gap:12px;}
+.hw-check{width:28px;height:28px;border-radius:8px;border:2px solid var(--gray-m);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;transition:.2s;}
+.hw-check.done{background:var(--green);border-color:var(--green);color:#fff;}
+.hw-body{flex:1;min-width:0;}
+.hw-title{font-size:14px;font-weight:500;}
+.hw-date{font-size:12px;color:var(--muted);margin-top:2px;}
+
+/* ---- MODAL / SHEET ---- */
+.backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;display:none;align-items:flex-end;justify-content:center;}
+.backdrop.show{display:flex;}
+.sheet{width:100%;max-width:480px;background:#fff;border-radius:24px 24px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));max-height:90vh;overflow-y:auto;animation:slideUp .28s ease;}
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:none;}}
+.sheet h3{font-size:18px;font-weight:700;margin-bottom:16px;}
+.fld{margin-bottom:13px;}
+.fld label{display:block;font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;}
+.fld input,.fld select,.fld textarea{width:100%;padding:12px 14px;border:1.5px solid var(--gray-m);border-radius:12px;font-family:inherit;font-size:14px;color:var(--ink);outline:none;background:#fff;resize:vertical;}
+.fld input:focus,.fld select:focus,.fld textarea:focus{border-color:var(--blue);}
+.fld textarea{min-height:80px;}
+.seg{display:flex;background:var(--gray-l);border-radius:12px;padding:3px;margin-bottom:14px;}
+.seg button{flex:1;border:none;background:none;padding:8px;border-radius:10px;font-family:inherit;font-weight:600;font-size:13px;color:var(--muted);cursor:pointer;}
+.seg button.on{background:#fff;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1);}
+.btn-primary{width:100%;background:var(--blue);color:#fff;border:none;border-radius:13px;padding:14px;font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;margin-top:4px;}
+.btn-danger{width:100%;background:var(--red-l);color:var(--red);border:none;border-radius:13px;padding:14px;font-family:inherit;font-size:14px;font-weight:600;cursor:pointer;margin-top:6px;}
+.btn-ghost{width:100%;background:none;color:var(--muted);border:none;padding:10px;font-family:inherit;font-size:13px;cursor:pointer;margin-top:2px;}
+
+/* ---- STATS BAR ---- */
+.stats-bar{display:flex;gap:8px;margin-bottom:14px;}
+.stat-card{flex:1;background:#fff;border-radius:14px;padding:12px;box-shadow:var(--shadow);text-align:center;}
+.stat-num{font-size:22px;font-weight:800;}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px;}
+
+/* ---- TOAST ---- */
+.toast{position:fixed;bottom:calc(20px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:600;z-index:100;opacity:0;transition:opacity .25s;pointer-events:none;white-space:nowrap;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+
+<!-- ===== SCREEN: LIST ===== -->
+<div class="screen active" id="s-list">
+  <div class="hdr" style="padding-top:calc(14px + env(safe-area-inset-top));">
+    <div class="hdr-title">👩‍🎓 Ученики курса</div>
+    <button class="hdr-action" onclick="openAddStudent()" title="Добавить">+</button>
+  </div>
+  <div class="content">
+    <div class="stats-bar" id="statsBar"></div>
+    <div class="search-wrap">
+      <span class="si">🔍</span>
+      <input type="search" placeholder="Поиск по имени..." id="searchInput" oninput="renderList()">
+    </div>
+    <div class="filters" id="filters">
+      <button class="chip on" data-f="all" onclick="setFilter('all')">Все</button>
+      <button class="chip" data-f="active" onclick="setFilter('active')">Активные</button>
+      <button class="chip" data-f="frozen" onclick="setFilter('frozen')">Заморожены</button>
+      <button class="chip" data-f="done" onclick="setFilter('done')">Завершили</button>
+      <button class="chip" data-f="hw" onclick="setFilter('hw')">Не сдали ДЗ</button>
+    </div>
+    <div id="studentList"></div>
+  </div>
+</div>
+
+<!-- ===== SCREEN: PROFILE ===== -->
+<div class="screen" id="s-profile">
+  <div class="profile-hero" id="profileHero">
+    <button class="hdr-back" onclick="showScreen('s-list')" style="margin-bottom:12px;background:rgba(255,255,255,.15);color:#fff;">←</button>
+    <div class="ph-name" id="phName">—</div>
+    <div class="ph-sub" id="phSub">—</div>
+    <div class="ph-badges" id="phBadges"></div>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="switchTab('info')">📋 Инфо</button>
+    <button class="tab" onclick="switchTab('calls')">📞 Созвоны</button>
+    <button class="tab" onclick="switchTab('hw')">📚 ДЗ</button>
+  </div>
+  <div class="tab-content on" id="tab-info"></div>
+  <div class="tab-content" id="tab-calls"></div>
+  <div class="tab-content" id="tab-hw"></div>
+</div>
+
+<!-- ===== SHEET: ADD/EDIT STUDENT ===== -->
+<div class="backdrop" id="bd-student" onclick="if(event.target===this)closeSheet('bd-student')">
+<div class="sheet">
+  <h3 id="studentSheetTitle">Новый ученик</h3>
+  <div class="fld"><label>Имя и фамилия</label><input id="f-name" placeholder="Айнур Жанузак"></div>
+  <div class="fld"><label>Куратор</label>
+    <select id="f-curator">
+      <option value="">— выбери куратора —</option>
+    </select>
+  </div>
+  <div class="fld"><label>Дата старта</label><input id="f-start" type="date"></div>
+  <div class="fld"><label>Статус</label>
+    <div class="seg">
+      <button class="on" data-s="active" onclick="setStudentStatus('active')">Активен</button>
+      <button data-s="frozen" onclick="setStudentStatus('frozen')">Заморожен</button>
+      <button data-s="done" onclick="setStudentStatus('done')">Завершил</button>
+    </div>
+  </div>
+  <div class="fld"><label>С чем пришёл на курс</label><textarea id="f-problem" placeholder="Опишите запрос ученика..."></textarea></div>
+  <div class="fld"><label>Текущий этап / урок</label><input id="f-progress" placeholder="Модуль 2, урок 5"></div>
+  <div class="fld"><label>Результаты</label><textarea id="f-results" placeholder="Что уже получил..."></textarea></div>
+  <div class="fld"><label>Сложности</label><textarea id="f-difficulties" placeholder="С чем испытывает трудности..."></textarea></div>
+  <div class="fld"><label>Заметки</label><textarea id="f-notes" placeholder="Любые пометки..."></textarea></div>
+  <button class="btn-primary" onclick="saveStudent()">Сохранить</button>
+  <button class="btn-danger" id="deleteStudentBtn" onclick="deleteStudent()" style="display:none">Удалить ученика</button>
+  <button class="btn-ghost" onclick="closeSheet('bd-student')">Отмена</button>
+</div>
+</div>
+
+<!-- ===== SHEET: ADD CALL ===== -->
+<div class="backdrop" id="bd-call" onclick="if(event.target===this)closeSheet('bd-call')">
+<div class="sheet">
+  <h3>Добавить созвон</h3>
+  <div class="fld"><label>Дата</label><input id="c-date" type="date"></div>
+  <div class="fld"><label>Заметки по созвону</label><textarea id="c-notes" placeholder="О чём говорили, договорённости..."></textarea></div>
+  <button class="btn-primary" onclick="saveCall()">Сохранить</button>
+  <button class="btn-ghost" onclick="closeSheet('bd-call')">Отмена</button>
+</div>
+</div>
+
+<!-- ===== SHEET: ADD HW ===== -->
+<div class="backdrop" id="bd-hw" onclick="if(event.target===this)closeSheet('bd-hw')">
+<div class="sheet">
+  <h3>Добавить домашнее задание</h3>
+  <div class="fld"><label>Название ДЗ</label><input id="hw-title" placeholder="Задание 3 — анализ прикуса"></div>
+  <div class="fld"><label>Дата выдачи</label><input id="hw-date" type="date"></div>
+  <button class="btn-primary" onclick="saveHW()">Добавить</button>
+  <button class="btn-ghost" onclick="closeSheet('bd-hw')">Отмена</button>
+</div>
+</div>
+
+<!-- ===== SHEET: ADD CURATOR ===== -->
+<div class="backdrop" id="bd-curator" onclick="if(event.target===this)closeSheet('bd-curator')">
+<div class="sheet">
+  <h3>Добавить куратора</h3>
+  <div class="fld"><label>Имя куратора</label><input id="cur-name" placeholder="Имя Фамилия"></div>
+  <button class="btn-primary" onclick="saveCurator()">Добавить</button>
+  <button class="btn-ghost" onclick="closeSheet('bd-curator')">Отмена</button>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ===== CONFIG ===== */
+// После подключения Google Apps Script замени эту строку на реальный URL:
+const API_URL = ''; // 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'
+
+/* ===== TELEGRAM ===== */
+const tg = window.Telegram && window.Telegram.WebApp;
+if (tg) { tg.ready(); tg.expand(); }
+
+/* ===== STORAGE ===== */
+const KEY = 'crm_v1';
+let DB = loadDB();
+
+function loadDB() {
+  try {
+    const d = JSON.parse(localStorage.getItem(KEY));
+    if (d && d.students) return d;
+  } catch(e) {}
+  return { students: [], curators: ['Куратор 1', 'Куратор 2'] };
+}
+function saveDB() { localStorage.setItem(KEY, JSON.stringify(DB)); }
+
+/* ===== SCREENS ===== */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+/* ===== TOAST ===== */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+/* ===== SHEETS ===== */
+function closeSheet(id) { document.getElementById(id).classList.remove('show'); }
+function openSheet(id) { document.getElementById(id).classList.add('show'); }
+
+/* ===== FILTER ===== */
+let curFilter = 'all';
+function setFilter(f) {
+  curFilter = f;
+  document.querySelectorAll('.chip').forEach(c => c.classList.toggle('on', c.dataset.f === f));
+  renderList();
+}
+
+/* ===== STATS ===== */
+function renderStats() {
+  const s = DB.students;
+  const active = s.filter(x => x.status === 'active').length;
+  const frozen = s.filter(x => x.status === 'frozen').length;
+  const done = s.filter(x => x.status === 'done').length;
+  const hwPending = s.filter(x => (x.homework||[]).some(h => !h.done)).length;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-card"><div class="stat-num" style="color:var(--blue)">${s.length}</div><div class="stat-lbl">Всего</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--green)">${active}</div><div class="stat-lbl">Активных</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--amber)">${hwPending}</div><div class="stat-lbl">Без ДЗ</div></div>
+    <div class="stat-card"><div class="stat-num" style="color:var(--gray)">${frozen}</div><div class="stat-lbl">Заморожено</div></div>`;
+}
+
+/* ===== LIST ===== */
+function renderList() {
+  renderStats();
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let list = DB.students;
+  if (q) list = list.filter(s => s.name.toLowerCase().includes(q) || (s.curator||'').toLowerCase().includes(q));
+  if (curFilter === 'active') list = list.filter(s => s.status === 'active');
+  if (curFilter === 'frozen') list = list.filter(s => s.status === 'frozen');
+  if (curFilter === 'done') list = list.filter(s => s.status === 'done');
+  if (curFilter === 'hw') list = list.filter(s => (s.homework||[]).some(h => !h.done));
+
+  const el = document.getElementById('studentList');
+  if (list.length === 0) {
+    el.innerHTML = `<div class="empty"><div class="ei">🎓</div><p>${q ? 'Не найдено' : 'Нет учеников в этой категории'}</p></div>`;
+    return;
+  }
+
+  el.innerHTML = list.map(s => {
+    const initials = s.name.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+    const statusBadge = s.status==='active'?'<span class="badge badge-active">Активен</span>':s.status==='frozen'?'<span class="badge badge-frozen">❄️ Заморожен</span>':'<span class="badge badge-done">✓ Завершил</span>';
+    const hwBadge = (s.homework||[]).some(h=>!h.done) ? '<span class="badge badge-hw">⚠️ Есть ДЗ</span>' : '';
+    const lastCall = (s.calls||[]).length ? `Последний созвон: ${fmtDate((s.calls)[s.calls.length-1].date)}` : 'Созвонов нет';
+    return `<div class="student-card" onclick="openProfile('${s.id}')">
+      <div class="sc-avatar">${initials}</div>
+      <div class="sc-body">
+        <div class="sc-name">${s.name}</div>
+        <div class="sc-sub">${s.curator||'—'} · ${lastCall}</div>
+        <div class="sc-badges">${statusBadge}${hwBadge}${s.progress?`<span class="badge" style="background:#F0F9FF;color:#0369A1">${s.progress}</span>`:''}</div>
+      </div>
+      <div class="sc-arrow">›</div>
+    </div>`;
+  }).join('');
+}
+
+function fmtDate(ds) {
+  if (!ds) return '—';
+  const [y,m,d] = ds.split('-');
+  const mon = ['янв','фев','мар','апр','мая','июн','июл','авг','сен','окт','ноя','дек'];
+  return `${+d} ${mon[+m-1]}`;
+}
+
+/* ===== ADD STUDENT ===== */
+let editingStudentId = null;
+let studentStatus = 'active';
+
+function openAddStudent() {
+  editingStudentId = null;
+  studentStatus = 'active';
+  document.getElementById('studentSheetTitle').textContent = 'Новый ученик';
+  document.getElementById('f-name').value = '';
+  document.getElementById('f-start').value = new Date().toISOString().slice(0,10);
+  document.getElementById('f-problem').value = '';
+  document.getElementById('f-progress').value = '';
+  document.getElementById('f-results').value = '';
+  document.getElementById('f-difficulties').value = '';
+  document.getElementById('f-notes').value = '';
+  document.getElementById('deleteStudentBtn').style.display = 'none';
+  setStudentStatus('active');
+  renderCuratorSelect();
+  openSheet('bd-student');
+  setTimeout(() => document.getElementById('f-name').focus(), 100);
+}
+
+function openEditStudent(id) {
+  const s = DB.students.find(x => x.id === id);
+  if (!s) return;
+  editingStudentId = id;
+  studentStatus = s.status || 'active';
+  document.getElementById('studentSheetTitle').textContent = 'Редактировать';
+  document.getElementById('f-name').value = s.name;
+  document.getElementById('f-start').value = s.startDate || '';
+  document.getElementById('f-problem').value = s.problem || '';
+  document.getElementById('f-progress').value = s.progress || '';
+  document.getElementById('f-results').value = s.results || '';
+  document.getElementById('f-difficulties').value = s.difficulties || '';
+  document.getElementById('f-notes').value = s.notes || '';
+  document.getElementById('deleteStudentBtn').style.display = 'block';
+  renderCuratorSelect(s.curator);
+  setStudentStatus(studentStatus);
+  openSheet('bd-student');
+}
+
+function setStudentStatus(s) {
+  studentStatus = s;
+  document.querySelectorAll('#bd-student .seg button').forEach(b => b.classList.toggle('on', b.dataset.s === s));
+}
+
+function renderCuratorSelect(selected) {
+  const sel = document.getElementById('f-curator');
+  sel.innerHTML = '<option value="">— выбери куратора —</option>' +
+    DB.curators.map(c => `<option value="${c}" ${c===selected?'selected':''}>${c}</option>`).join('') +
+    '<option value="__new__">+ Добавить куратора</option>';
+  sel.onchange = () => { if (sel.value === '__new__') { sel.value=''; openSheet('bd-curator'); } };
+}
+
+function saveStudent() {
+  const name = document.getElementById('f-name').value.trim();
+  if (!name) { toast('Введи имя ученика'); return; }
+  if (editingStudentId) {
+    const s = DB.students.find(x => x.id === editingStudentId);
+    Object.assign(s, getStudentFields());
+    toast('Сохранено ✅');
+  } else {
+    DB.students.push({ id: 'st_'+Date.now(), ...getStudentFields(), calls: [], homework: [] });
+    toast('Ученик добавлен ✅');
+    if(tg) tg.HapticFeedback.notificationOccurred('success');
+  }
+  saveDB(); closeSheet('bd-student'); renderList();
+  if (editingStudentId) renderProfile(editingStudentId);
+}
+
+function getStudentFields() {
+  return {
+    name: document.getElementById('f-name').value.trim(),
+    curator: document.getElementById('f-curator').value,
+    startDate: document.getElementById('f-start').value,
+    status: studentStatus,
+    problem: document.getElementById('f-problem').value.trim(),
+    progress: document.getElementById('f-progress').value.trim(),
+    results: document.getElementById('f-results').value.trim(),
+    difficulties: document.getElementById('f-difficulties').value.trim(),
+    notes: document.getElementById('f-notes').value.trim(),
+  };
+}
+
+function deleteStudent() {
+  const confirm = () => { DB.students = DB.students.filter(x => x.id !== editingStudentId); saveDB(); closeSheet('bd-student'); showScreen('s-list'); renderList(); toast('Ученик удалён'); };
+  if (tg) tg.showConfirm('Удалить ученика?', ok => { if(ok) confirm(); });
+  else if (window.confirm('Удалить?')) confirm();
+}
+
+/* ===== PROFILE ===== */
+let curStudentId = null;
+let curTab = 'info';
+
+function openProfile(id) {
+  curStudentId = id;
+  curTab = 'info';
+  renderProfile(id);
+  showScreen('s-profile');
+  switchTab('info');
+}
+
+function renderProfile(id) {
+  const s = DB.students.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('phName').textContent = s.name;
+  document.getElementById('phSub').textContent = (s.curator||'Куратор не назначен') + (s.startDate ? ' · Старт: '+fmtDate(s.startDate) : '');
+  const statusLabel = s.status==='active'?'🟢 Активен':s.status==='frozen'?'❄️ Заморожен':'✅ Завершил';
+  document.getElementById('phBadges').innerHTML =
+    `<span class="ph-badge">${statusLabel}</span>${s.progress?`<span class="ph-badge">📍 ${s.progress}</span>`:''}` +
+    `<span class="ph-badge" onclick="openEditStudent('${id}')" style="cursor:pointer">✏️ Изменить</span>`;
+}
+
+function switchTab(t) {
+  curTab = t;
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.textContent.toLowerCase().includes(t==='info'?'инфо':t==='calls'?'созв':'дз')));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('on'));
+  document.getElementById('tab-'+t).classList.add('on');
+  if (t==='info') renderTabInfo();
+  if (t==='calls') renderTabCalls();
+  if (t==='hw') renderTabHW();
+}
+
+function renderTabInfo() {
+  const s = DB.students.find(x => x.id === curStudentId);
+  if (!s) return;
+  document.getElementById('tab-info').innerHTML = `
+    <div class="info-section">
+      <h4>Основное</h4>
+      ${row('Куратор', s.curator||'—')}
+      ${row('Дата старта', fmtDate(s.startDate))}
+      ${row('Этап', s.progress||'—')}
+    </div>
+    <div class="info-section">
+      <h4>С чем пришёл</h4>
+      <p style="font-size:14px;line-height:1.6;color:${s.problem?'var(--ink)':'var(--muted)'}">${s.problem||'Не заполнено'}</p>
+    </div>
+    <div class="info-section">
+      <h4>Результаты</h4>
+      <p style="font-size:14px;line-height:1.6;color:${s.results?'var(--ink)':'var(--muted)'}">${s.results||'Не заполнено'}</p>
+    </div>
+    <div class="info-section">
+      <h4>Сложности</h4>
+      <p style="font-size:14px;line-height:1.6;color:${s.difficulties?'var(--ink)':'var(--muted)'}">${s.difficulties||'Не заполнено'}</p>
+    </div>
+    ${s.notes?`<div class="info-section"><h4>Заметки</h4><p style="font-size:14px;line-height:1.6;">${s.notes}</p></div>`:''}`;
+}
+
+function row(label, val) {
+  return `<div class="info-row"><div class="ir-label">${label}</div><div class="ir-val">${val}</div></div>`;
+}
+
+function renderTabCalls() {
+  const s = DB.students.find(x => x.id === curStudentId);
+  const calls = [...(s.calls||[])].reverse();
+  document.getElementById('tab-calls').innerHTML = `
+    ${calls.length===0 ? '<div class="empty"><div class="ei">📞</div><p>Созвонов ещё не было</p></div>' :
+      calls.map(c => `<div class="call-item"><div class="call-date">${fmtDate(c.date)}</div><div class="call-note">${c.notes||'—'}</div></div>`).join('')}
+    <button class="add-btn" onclick="openAddCall()">+ Добавить созвон</button>`;
+}
+
+function renderTabHW() {
+  const s = DB.students.find(x => x.id === curStudentId);
+  const hw = s.homework || [];
+  document.getElementById('tab-hw').innerHTML = `
+    ${hw.length===0 ? '<div class="empty"><div class="ei">📚</div><p>Домашних заданий нет</p></div>' :
+      hw.map((h,i) => `<div class="hw-item">
+        <div class="hw-check ${h.done?'done':''}" onclick="toggleHW(${i})">✓</div>
+        <div class="hw-body">
+          <div class="hw-title" style="text-decoration:${h.done?'line-through':''};color:${h.done?'var(--muted)':'var(--ink)'}">${h.title}</div>
+          <div class="hw-date">Выдано: ${fmtDate(h.date)}</div>
+        </div>
+      </div>`).join('')}
+    <button class="add-btn" onclick="openAddHW()">+ Добавить ДЗ</button>`;
+}
+
+/* ===== CALLS ===== */
+function openAddCall() {
+  document.getElementById('c-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('c-notes').value = '';
+  openSheet('bd-call');
+}
+function saveCall() {
+  const s = DB.students.find(x => x.id === curStudentId);
+  s.calls = s.calls||[];
+  s.calls.push({ id:'c_'+Date.now(), date:document.getElementById('c-date').value, notes:document.getElementById('c-notes').value.trim() });
+  saveDB(); closeSheet('bd-call'); renderTabCalls(); toast('Созвон добавлен ✅');
+  if(tg) tg.HapticFeedback.notificationOccurred('success');
+}
+
+/* ===== HOMEWORK ===== */
+function openAddHW() {
+  document.getElementById('hw-title').value = '';
+  document.getElementById('hw-date').value = new Date().toISOString().slice(0,10);
+  openSheet('bd-hw');
+}
+function saveHW() {
+  const title = document.getElementById('hw-title').value.trim();
+  if (!title) { toast('Введи название ДЗ'); return; }
+  const s = DB.students.find(x => x.id === curStudentId);
+  s.homework = s.homework||[];
+  s.homework.push({ id:'hw_'+Date.now(), title, date:document.getElementById('hw-date').value, done:false });
+  saveDB(); closeSheet('bd-hw'); renderTabHW(); toast('ДЗ добавлено ✅');
+}
+function toggleHW(idx) {
+  const s = DB.students.find(x => x.id === curStudentId);
+  s.homework[idx].done = !s.homework[idx].done;
+  saveDB(); renderTabHW(); renderStats();
+  if(tg) tg.HapticFeedback.impactOccurred('light');
+}
+
+/* ===== CURATORS ===== */
+function saveCurator() {
+  const name = document.getElementById('cur-name').value.trim();
+  if (!name) { toast('Введи имя'); return; }
+  if (!DB.curators.includes(name)) { DB.curators.push(name); saveDB(); }
+  closeSheet('bd-curator');
+  renderCuratorSelect(name);
+  document.getElementById('f-curator').value = name;
+  toast(`Куратор "${name}" добавлен`);
+}
+
+/* ===== INIT ===== */
+renderList();
+</script>
+</body>
+</html>
