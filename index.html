@@ -140,6 +140,16 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
 </head>
 <body>
 
+<!-- DASHBOARD -->
+<div class="screen" id="s-dashboard">
+  <div class="hdr">
+    <button class="icon-btn icon-btn-ghost" onclick="showScreen('s-list')">←</button>
+    <div class="hdr-title" style="flex:1">📊 Дашборд</div>
+    <button class="icon-btn icon-btn-ghost" onclick="renderDashboard()">↻</button>
+  </div>
+  <div class="content" id="dashContent"></div>
+</div>
+
 <!-- ROLE SELECTION -->
 <div class="screen active" id="s-role" style="background:linear-gradient(160deg,#1e3a5f,#1D4ED8);color:#fff;align-items:center;justify-content:center;padding:24px;">
   <div style="font-size:48px;margin-bottom:16px;">👩‍🎓</div>
@@ -160,6 +170,7 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
       <div class="hdr-title" id="hdrTitle">Ученики курса</div>
       <div class="hdr-sub" id="lastUpdated">Загрузка...</div>
     </div>
+    <button class="icon-btn icon-btn-ghost" onclick="openDashboard()" title="Дашборд" style="font-size:14px">📊</button>
     <button class="icon-btn icon-btn-ghost" onclick="loadStudents()">↻</button>
     <button class="icon-btn icon-btn-primary" id="addBtn" onclick="openAdd()" style="display:none">+</button>
     <button class="icon-btn icon-btn-ghost" id="mgmtBtn" onclick="openCuratorMgmt()" style="display:none;font-size:14px;">⚙️</button>
@@ -243,6 +254,17 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
   <div class="fld"><label>Комментарий</label><textarea id="mod-comment" placeholder="Что обсудили, договорённости..."></textarea></div>
   <button class="btn-primary" onclick="saveModuleComment()">Сохранить</button>
   <button class="btn-ghost" onclick="closeSheet('bd-module')">Отмена</button>
+</div>
+</div>
+
+<!-- SHEET: LOG CALL -->
+<div class="backdrop" id="bd-call" onclick="if(event.target===this)closeSheet('bd-call')">
+<div class="sheet">
+  <h3>📞 Записать созвон</h3>
+  <div class="fld"><label>Дата созвона</label><input id="call-date" type="date"></div>
+  <div class="fld"><label>Краткое резюме</label><textarea id="call-note" placeholder="Что обсудили, договорённости..."></textarea></div>
+  <button class="btn-primary" onclick="saveCall()">Сохранить созвон</button>
+  <button class="btn-ghost" onclick="closeSheet('bd-call')">Отмена</button>
 </div>
 </div>
 
@@ -523,6 +545,8 @@ function renderList() {
       const cls = m ? (m.hw&&m.meeting?'full':m.hw||m.meeting?'partial':'') : (i===prog.current?'cur':'');
       return `<div class="sc-dot ${cls}"></div>`;
     }).join('');
+    const days = getDaysSinceContact(s);
+    const noContactFlag = s.status==='active' && (days===null||days>=NO_CONTACT_DAYS) ? `<span class="badge" style="background:var(--red-l);color:var(--red);">⚠️ ${days===null?'Нет созвона':days+'дн.'}</span>` : '';
     const sb = s.status==='frozen'?'<span class="badge badge-frozen">❄️ Заморожен</span>'
       : s.status==='done'?'<span class="badge badge-done">✅ Завершил</span>'
       : `<span class="badge badge-active">${prog.completed}/8 модулей</span>`;
@@ -531,7 +555,7 @@ function renderList() {
       <div class="sc-avatar" style="${s.status==='frozen'?'background:#DBEAFE;color:#1D4ED8':''}">${s.status==='frozen'?'❄️':initials}</div>
       <div class="sc-body">
         <div class="sc-name">${s.name||'—'}</div>
-        <div class="sc-sub">${sb}<span>${tariffTxt}</span>${s.curator?`<span>👤 ${s.curator}</span>`:''}</div>
+        <div class="sc-sub">${sb}${noContactFlag}<span>${tariffTxt}</span>${s.curator?`<span>👤 ${s.curator}</span>`:''}</div>
         <div class="sc-progress">${dots}</div>
       </div>
       <div class="sc-arr">›</div>
@@ -695,7 +719,18 @@ function renderInfo() {
     </div>
     ${s.problem ? `<div class="info-card"><h4>С чем пришёл</h4><p class="ir-text">${s.problem}</p></div>` : ''}
     ${s.results ? `<div class="info-card"><h4>Результаты</h4><p class="ir-text">${s.results}</p></div>` : ''}
-    ${s.difficulties ? `<div class="info-card"><h4>Сложности</h4><p class="ir-text">${s.difficulties}</p></div>` : ''}`;
+    ${s.difficulties ? `<div class="info-card"><h4>Сложности</h4><p class="ir-text">${s.difficulties}</p></div>` : ''}
+    <div class="info-card">
+      <h4>📞 История созвонов</h4>
+      ${(() => {
+        const calls = s.modules && s.modules[8] ? (s.modules[8].calls||[]) : [];
+        const rows = calls.slice().reverse().map(c =>
+          `<div class="info-row"><div class="ir-lbl">${fmtDate(c.date)}</div><div class="ir-val" style="text-align:left;flex:1;margin-left:8px;font-size:11px;">${c.note||'—'}</div></div>`
+        ).join('') || '<p style="color:var(--muted);font-size:12px;">Созвонов ещё нет</p>';
+        return rows;
+      })()}
+      <button onclick="openCallSheet()" style="margin-top:8px;width:100%;padding:9px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">+ Записать созвон</button>
+    </div>`;
 }
 
 function irow(l, v) { return `<div class="info-row"><div class="ir-lbl">${l}</div><div class="ir-val">${v}</div></div>`; }
@@ -772,6 +807,105 @@ async function saveNotes() {
   if (s) s.notes = notes;
   toast('Заметки сохранены ✅');
   if (tg) tg.HapticFeedback.notificationOccurred('success');
+}
+
+/* ===== CALL LOG ===== */
+function getLastContact(s) {
+  const calls = (s.modules && s.modules[8]) ? s.modules[8].calls || [] : [];
+  if (!calls.length) return null;
+  return calls[calls.length - 1];
+}
+function getDaysSinceContact(s) {
+  const lc = getLastContact(s);
+  if (!lc) return null;
+  const diff = Date.now() - new Date(lc.date).getTime();
+  return Math.floor(diff / 86400000);
+}
+function openCallSheet() {
+  document.getElementById('call-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('call-note').value = '';
+  openSheet('bd-call');
+}
+async function saveCall() {
+  const s = students.find(x => x.id === curId);
+  if (!s) return;
+  const mods = [...(s.modules || [])];
+  while (mods.length <= 8) mods.push({});
+  const calls = [...(mods[8].calls || [])];
+  calls.push({ date: document.getElementById('call-date').value, note: document.getElementById('call-note').value.trim() });
+  mods[8] = { ...mods[8], calls };
+  await sbUpdate('students', curId, { modules: mods });
+  s.modules = mods;
+  closeSheet('bd-call');
+  renderInfo();
+  toast('Созвон записан ✅');
+  if (tg) tg.HapticFeedback.notificationOccurred('success');
+}
+
+/* ===== DASHBOARD ===== */
+const NO_CONTACT_DAYS = 14;
+
+function openDashboard() {
+  renderDashboard();
+  showScreen('s-dashboard');
+}
+
+function renderDashboard() {
+  const isSenior = role === 'senior';
+  const myStudents = isSenior ? students : students.filter(s => s.curator === role);
+  const noContact = myStudents.filter(s => {
+    const days = getDaysSinceContact(s);
+    return s.status === 'active' && (days === null || days >= NO_CONTACT_DAYS);
+  });
+
+  let html = '';
+
+  // Overall stats
+  html += `<div class="info-card"><h4>Общая статистика</h4>
+    ${irow('Всего учеников', myStudents.length)}
+    ${irow('Активных', myStudents.filter(s=>s.status==='active').length)}
+    ${irow('Заморожено', myStudents.filter(s=>s.status==='frozen').length)}
+    ${irow('Завершили', myStudents.filter(s=>s.status==='done').length)}
+  </div>`;
+
+  // No contact alert
+  if (noContact.length) {
+    html += `<div class="info-card" style="border-left:3px solid var(--red);">
+      <h4 style="color:var(--red);">⚠️ Нет созвона более ${NO_CONTACT_DAYS} дней (${noContact.length})</h4>
+      ${noContact.map(s => {
+        const days = getDaysSinceContact(s);
+        return `<div class="info-row" style="cursor:pointer" onclick="openProfileFromDash('${s.id}')">
+          <div class="ir-lbl">${s.name}</div>
+          <div class="ir-val" style="color:var(--red)">${days === null ? 'Никогда' : days + ' дн.'}</div>
+        </div>`;
+      }).join('')}
+    </div>`;
+  } else {
+    html += `<div class="info-card" style="border-left:3px solid var(--green);">
+      <h4 style="color:var(--green);">✅ Все активные ученики имеют созвон в последние ${NO_CONTACT_DAYS} дней</h4>
+    </div>`;
+  }
+
+  // Per-curator stats (senior only)
+  if (isSenior && curators.length) {
+    html += `<div class="info-card"><h4>По кураторам</h4>`;
+    curators.forEach(c => {
+      const cs = students.filter(s => s.curator === c);
+      const cnc = cs.filter(s => { const d=getDaysSinceContact(s); return s.status==='active'&&(d===null||d>=NO_CONTACT_DAYS); });
+      html += `<div class="info-row">
+        <div class="ir-lbl">👤 ${c}</div>
+        <div class="ir-val">${cs.length} уч. ${cnc.length?`<span style="color:var(--red);font-weight:700;">⚠️${cnc.length}</span>`:'✅'}</div>
+      </div>`;
+    });
+    html += '</div>';
+  }
+
+  document.getElementById('dashContent').innerHTML = html;
+}
+
+function openProfileFromDash(id) {
+  showScreen('s-list');
+  setTimeout(() => openProfile(id), 50);
 }
 
 /* ===== INIT ===== */
