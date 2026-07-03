@@ -150,6 +150,11 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
     <button class="icon-btn icon-btn-ghost" onclick="loadStudents()" title="Обновить">↻</button>
     <button class="icon-btn icon-btn-primary" onclick="openAdd()">+</button>
   </div>
+  <!-- Curator mode banner -->
+  <div id="curatorBanner" style="display:none;background:var(--blue);color:#fff;padding:8px 14px;font-size:12px;font-weight:600;display:flex;align-items:center;gap:8px;">
+    <span>👤 Режим куратора: <span id="curatorBannerName"></span></span>
+    <button onclick="setCuratorMode(null)" style="margin-left:auto;background:rgba(255,255,255,.25);border:none;color:#fff;border-radius:6px;padding:3px 8px;font-size:11px;cursor:pointer;">Выйти</button>
+  </div>
   <div class="content">
     <div class="stats-bar" id="statsBar"></div>
     <div class="search-wrap">
@@ -165,6 +170,12 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
       <button class="chip" data-f="individual" onclick="setFilter('individual')">👤 Инд. куратор</button>
       <button class="chip" data-f="ainur" onclick="setFilter('ainur')">⭐ Инд. Айнур</button>
     </div>
+    <!-- Curator picker row -->
+    <div id="curatorRow" style="display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:8px;scrollbar-width:none;align-items:center;">
+      <span style="font-size:11px;color:var(--muted);white-space:nowrap;flex-shrink:0;">Куратор:</span>
+      <div id="curatorChips" style="display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;"></div>
+    </div>
+    <!-- Month filters: all 12 always shown -->
     <div class="month-filters" id="monthFilters"></div>
     <div id="studentList"><div class="loading"><div class="spinner"></div><span>Загрузка...</span></div></div>
   </div>
@@ -277,11 +288,15 @@ const MODULE_NAMES = ['Модуль 1','Модуль 2','Модуль 3','Мод
 let students = [];
 let curFilter = 'all';
 let curMonth = 'all';
+let curCurator = null;
 let curId = null;
 let editId = null;
 let selectedTariff = 'group';
 let selectedStatus = 'active';
 let editingModIdx = null;
+
+const CURATOR_KEY = 'crm_curator_v1';
+curCurator = localStorage.getItem(CURATOR_KEY) || null;
 
 function toast(msg) {
   const t = document.getElementById('toast');
@@ -308,6 +323,8 @@ async function loadStudents() {
       students = data;
       document.getElementById('lastUpdated').textContent = 'Обновлено ' + new Date().toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
       renderMonthFilters();
+      renderCuratorChips();
+      setCuratorMode(curCurator);
       renderList();
     } else {
       throw new Error(JSON.stringify(data));
@@ -331,20 +348,47 @@ function renderStats() {
     <div class="stat-card"><div class="stat-num" style="color:var(--gray)">${done}</div><div class="stat-lbl">Завершили</div></div>`;
 }
 
+/* ===== CURATOR MODE ===== */
+function setCuratorMode(name) {
+  curCurator = name;
+  if (name) localStorage.setItem(CURATOR_KEY, name);
+  else localStorage.removeItem(CURATOR_KEY);
+  const banner = document.getElementById('curatorBanner');
+  if (name) {
+    banner.style.display = 'flex';
+    document.getElementById('curatorBannerName').textContent = name;
+  } else {
+    banner.style.display = 'none';
+  }
+  renderCuratorChips();
+  renderList();
+}
+
+function renderCuratorChips() {
+  const curators = [...new Set(students.map(s=>s.curator).filter(Boolean))].sort();
+  const el = document.getElementById('curatorChips');
+  if (!curators.length) { document.getElementById('curatorRow').style.display='none'; return; }
+  document.getElementById('curatorRow').style.display = 'flex';
+  el.innerHTML = '<button class="chip ' + (!curCurator?'on':'') + '" onclick="setCuratorMode(null)" style="flex-shrink:0">Все</button>' +
+    curators.map(c=>`<button class="chip ${curCurator===c?'on':''}" onclick="setCuratorMode('${c.replace(/'/g,"\\'")}')">👤 ${c}</button>`).join('');
+}
+
 /* ===== MONTH FILTERS ===== */
 function renderMonthFilters() {
-  const months = new Map();
+  const counts = new Array(12).fill(0);
   students.forEach(s => {
     if (s.start_date) {
       const m = new Date(s.start_date).getMonth();
-      if (!isNaN(m)) months.set(m, (months.get(m)||0)+1);
+      if (!isNaN(m)) counts[m]++;
     }
   });
-  const sorted = [...months.entries()].sort((a,b)=>a[0]-b[0]);
   const el = document.getElementById('monthFilters');
-  if (!sorted.length) { el.innerHTML=''; return; }
   el.innerHTML = '<button class="chip on" data-m="all" onclick="setMonth(\'all\')">📅 Все</button>' +
-    sorted.map(([m,c])=>`<button class="chip" data-m="${m}" onclick="setMonth('${m}')">${MONTH_SHORT[m]} (${c})</button>`).join('');
+    MONTH_SHORT.map((name, i) => {
+      const cnt = counts[i];
+      const style = cnt === 0 ? 'opacity:.4' : '';
+      return `<button class="chip" data-m="${i}" onclick="setMonth('${i}')" style="${style}">${name}${cnt?' ('+cnt+')':''}</button>`;
+    }).join('');
 }
 
 /* ===== FILTERS ===== */
@@ -380,6 +424,9 @@ function renderList() {
 
   if (curMonth !== 'all') {
     list = list.filter(s => s.start_date && new Date(s.start_date).getMonth() === parseInt(curMonth));
+  }
+  if (curCurator) {
+    list = list.filter(s => s.curator === curCurator);
   }
 
   const el = document.getElementById('studentList');
