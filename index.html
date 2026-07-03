@@ -156,9 +156,6 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
     <div class="hdr-title" style="flex:1">📊 Дашборд</div>
     <button class="icon-btn icon-btn-ghost" onclick="renderDashboard()">↻</button>
   </div>
-  <div style="padding:10px 12px 0;">
-    <button onclick="exportCSV()" style="width:100%;padding:12px;background:var(--green-l);color:#15803D;border:1.5px solid var(--green);border-radius:11px;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">📤 Скачать Excel (CSV)</button>
-  </div>
   <div class="content" id="dashContent"></div>
 </div>
 
@@ -1049,6 +1046,9 @@ function renderDashboard() {
   });
 
   let html = '';
+
+  // Export button always first
+  html += `<button onclick="exportCSV()" style="width:100%;padding:13px;background:var(--green-l);color:#15803D;border:1.5px solid var(--green);border-radius:11px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:10px;">📤 Скачать Excel (CSV)</button>`;
 
   // Overall stats
   html += `<div class="info-card"><h4>Общая статистика</h4>
