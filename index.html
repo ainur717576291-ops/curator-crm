@@ -159,6 +159,16 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
   <div class="content" id="dashContent"></div>
 </div>
 
+<!-- SALARY (senior only) -->
+<div class="screen" id="s-salary">
+  <div class="hdr">
+    <button class="icon-btn icon-btn-ghost" onclick="showScreen('s-list')">←</button>
+    <div class="hdr-title" style="flex:1">💰 ЗП кураторов</div>
+    <button class="icon-btn icon-btn-ghost" onclick="renderSalary()">↻</button>
+  </div>
+  <div class="content" id="salaryContent"></div>
+</div>
+
 <!-- ROLE SELECTION -->
 <div class="screen active" id="s-role" style="background:linear-gradient(160deg,#1e3a5f,#1D4ED8);color:#fff;align-items:center;justify-content:center;padding:24px;">
   <div style="font-size:48px;margin-bottom:16px;">👩‍🎓</div>
@@ -209,6 +219,7 @@ html,body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:va
     <button class="bnav-btn" id="nav-dash" onclick="navTo('dash')"><span class="bni">📊</span>Дашборд</button>
     <button class="bnav-btn" id="nav-add" onclick="openAdd()" style="display:none" id="nav-add-btn"><span class="bni">➕</span>Добавить</button>
     <button class="bnav-btn" id="nav-mgmt" onclick="openCuratorMgmt()" style="display:none"><span class="bni">⚙️</span>Кураторы</button>
+    <button class="bnav-btn" id="nav-salary" onclick="navTo('salary')" style="display:none"><span class="bni">💰</span>ЗП</button>
     <button class="bnav-btn" id="nav-exit" onclick="logout()"><span class="bni">🚪</span>Выйти</button>
   </nav>
 </div>
@@ -491,6 +502,7 @@ function enterApp() {
   document.getElementById('mgmtBtn').style.display = isSenior ? 'flex' : 'none';
   document.getElementById('nav-add-btn') && (document.getElementById('nav-add-btn').style.display = isSenior ? 'flex' : 'none');
   document.getElementById('nav-mgmt').style.display = isSenior ? 'flex' : 'none';
+  document.getElementById('nav-salary').style.display = isSenior ? 'flex' : 'none';
   document.getElementById('s-list').classList.add('has-nav');
   showScreen('s-list');
   loadStudents();
@@ -501,6 +513,9 @@ function navTo(tab) {
   if (tab === 'dash') {
     document.getElementById('nav-dash').classList.add('on');
     openDashboard();
+  } else if (tab === 'salary') {
+    document.getElementById('nav-salary').classList.add('on');
+    openSalary();
   } else {
     document.getElementById('nav-list').classList.add('on');
     showScreen('s-list');
@@ -1054,6 +1069,169 @@ async function saveCall() {
   renderInfo();
   toast('Созвон записан ✅');
   if (tg) tg.HapticFeedback.notificationOccurred('success');
+}
+
+/* ===== SALARY (ЗП кураторов) — senior only ===== */
+let salaryView = 'pay'; // 'pay' | 'rates'
+
+function fmtMoney(n) {
+  const v = Math.round(Number(n) || 0);
+  return String(v).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ₸';
+}
+function tariffLabel(t) {
+  return t === 'ainur' ? 'С Айнур' : t === 'individual' ? 'Индивидуально' : 'Группа';
+}
+function getRate(curatorName, tariff) {
+  const r = window._cfg && window._cfg.rates && window._cfg.rates[curatorName];
+  return (r && Number(r[tariff])) || 0;
+}
+function isSalaryEligible(s, curatorName) {
+  return s.curator === curatorName
+    && s.modules && s.modules[10] && s.modules[10].oferta === true
+    && getModuleProgress(s).completed === 8
+    && !(s.modules[10] && s.modules[10].salary_paid);
+}
+
+function openSalary() {
+  if (role !== 'senior') { toast('Доступ только для старшего куратора'); return; }
+  renderSalary();
+  showScreen('s-salary');
+}
+function setSalaryView(v) { salaryView = v; renderSalary(); }
+
+async function setRate(idx, tariff, val) {
+  const name = curators[idx];
+  if (!name) return;
+  if (!window._cfg) window._cfg = {};
+  if (!window._cfg.rates) window._cfg.rates = {};
+  if (!window._cfg.rates[name]) window._cfg.rates[name] = { group: 0, individual: 0, ainur: 0 };
+  window._cfg.rates[name][tariff] = Number(val) || 0;
+  await saveConfig();
+  toast('Ставка сохранена');
+}
+
+async function markPaid(id) {
+  const s = students.find(x => x.id === id);
+  if (!s) return;
+  const mods = [...(s.modules || [])];
+  while (mods.length <= 10) mods.push({});
+  mods[10] = { ...mods[10], salary_paid: true, salary_paid_date: new Date().toISOString().slice(0,10) };
+  try {
+    await sbUpdate('students', id, { modules: mods });
+    s.modules = mods;
+    toast('Отмечено выплаченным ✅');
+    if (tg && tg.HapticFeedback) tg.HapticFeedback.notificationOccurred('success');
+    renderSalary();
+  } catch(e) { toast('Ошибка сохранения'); }
+}
+async function unmarkPaid(id) {
+  const s = students.find(x => x.id === id);
+  if (!s) return;
+  const mods = [...(s.modules || [])];
+  while (mods.length <= 10) mods.push({});
+  mods[10] = { ...mods[10], salary_paid: false, salary_paid_date: null };
+  try {
+    await sbUpdate('students', id, { modules: mods });
+    s.modules = mods;
+    toast('Выплата отменена');
+    renderSalary();
+  } catch(e) { toast('Ошибка сохранения'); }
+}
+
+function rateInput(i, tariff, label, val) {
+  return `<div style="flex:1;min-width:0;">
+    <label style="display:block;font-size:10px;color:var(--muted);margin-bottom:3px;">${label}</label>
+    <input type="number" inputmode="numeric" min="0" value="${val != null ? val : 0}" onchange="setRate(${i},'${tariff}',this.value)" style="width:100%;padding:8px 6px;border:1.5px solid var(--gray-m);border-radius:9px;font-family:inherit;font-size:13px;outline:none;background:#fff;">
+  </div>`;
+}
+function renderRatesBlock() {
+  if (!curators.length) return `<div class="info-card"><p style="color:var(--muted);font-size:13px;">Сначала добавьте кураторов в разделе ⚙️ Кураторы</p></div>`;
+  let h = `<div class="info-card"><h4>Ставки — ₸ за участника</h4>
+    <p style="color:var(--muted);font-size:11px;margin-bottom:6px;line-height:1.4;">Сколько куратор получает за одного ученика, завершившего курс (8 модулей + оферта).</p>`;
+  curators.forEach((c, i) => {
+    const r = (window._cfg && window._cfg.rates && window._cfg.rates[c]) || {};
+    h += `<div style="padding:10px 0;border-bottom:1px solid var(--gray-l);">
+      <div style="font-size:13px;font-weight:600;margin-bottom:6px;">👤 ${c}</div>
+      <div style="display:flex;gap:6px;">
+        ${rateInput(i, 'group', 'Группа', r.group)}
+        ${rateInput(i, 'individual', 'Индивид.', r.individual)}
+        ${rateInput(i, 'ainur', 'С Айнур', r.ainur)}
+      </div>
+    </div>`;
+  });
+  h += `</div>`;
+  return h;
+}
+
+function renderPayBlock() {
+  if (!curators.length) return `<div class="info-card"><p style="color:var(--muted);font-size:13px;">Кураторов пока нет</p></div>`;
+  let grand = 0;
+  let cards = '';
+  curators.forEach(c => {
+    const elig = students.filter(s => isSalaryEligible(s, c));
+    if (!elig.length) return;
+    let sub = 0;
+    const rows = elig.map(s => {
+      const amt = getRate(c, s.tariff);
+      sub += amt;
+      return `<div class="info-row" style="align-items:center;">
+        <div style="flex:1;min-width:0;margin-right:8px;">
+          <div style="font-size:13px;font-weight:600;">${s.name || '—'}</div>
+          <div style="font-size:11px;color:var(--muted);">${tariffLabel(s.tariff)} · ${fmtMoney(amt)}</div>
+        </div>
+        <button onclick="markPaid('${s.id}')" style="background:var(--green-l);color:#15803D;border:1.5px solid var(--green);border-radius:9px;padding:7px 10px;font-family:inherit;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0;">✅ ЗП выплачена</button>
+      </div>`;
+    }).join('');
+    grand += sub;
+    cards += `<div class="info-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;gap:8px;">
+        <h4 style="margin:0;">👤 ${c}</h4>
+        <span class="badge badge-active" style="white-space:nowrap;">К выплате: ${fmtMoney(sub)}</span>
+      </div>
+      ${rows}
+    </div>`;
+  });
+  let h = `<div class="info-card" style="border-left:3px solid var(--blue);">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;">
+      <h4 style="margin:0;color:var(--blue-d);">Итого к выплате</h4>
+      <span style="font-size:18px;font-weight:800;color:var(--blue-d);white-space:nowrap;">${fmtMoney(grand)}</span>
+    </div></div>`;
+  h += cards || `<div class="info-card"><div class="empty" style="padding:24px;"><div class="ei">🎉</div><p>Нет учеников к выплате</p></div></div>`;
+  return h;
+}
+
+function renderPaidBlock() {
+  const paid = students.filter(s => s.modules && s.modules[10] && s.modules[10].salary_paid);
+  if (!paid.length) return '';
+  paid.sort((a, b) => String((b.modules[10] || {}).salary_paid_date || '').localeCompare(String((a.modules[10] || {}).salary_paid_date || '')));
+  const rows = paid.map(s => {
+    const amt = getRate(s.curator, s.tariff);
+    return `<div class="info-row" style="align-items:center;">
+      <div style="flex:1;min-width:0;margin-right:8px;">
+        <div style="font-size:13px;font-weight:600;">${s.name || '—'}</div>
+        <div style="font-size:11px;color:var(--muted);">👤 ${s.curator || '—'} · ${fmtMoney(amt)} · ${fmtDate(s.modules[10].salary_paid_date)}</div>
+      </div>
+      <button onclick="unmarkPaid('${s.id}')" style="background:var(--gray-l);color:var(--muted);border:none;border-radius:9px;padding:7px 10px;font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;">↩︎ Отменить</button>
+    </div>`;
+  }).join('');
+  return `<div class="info-card"><h4>✅ Выплачено (${paid.length})</h4>${rows}</div>`;
+}
+
+function renderSalary() {
+  const el = document.getElementById('salaryContent');
+  if (!el) return;
+  if (role !== 'senior') { el.innerHTML = ''; return; }
+  let html = `<div class="filters" style="margin-bottom:10px;">
+    <button class="chip ${salaryView === 'pay' ? 'on' : ''}" onclick="setSalaryView('pay')">💰 К выплате</button>
+    <button class="chip ${salaryView === 'rates' ? 'on' : ''}" onclick="setSalaryView('rates')">⚙️ Ставки</button>
+  </div>`;
+  if (salaryView === 'rates') {
+    html += renderRatesBlock();
+  } else {
+    html += renderPayBlock();
+    html += renderPaidBlock();
+  }
+  el.innerHTML = html;
 }
 
 /* ===== DASHBOARD ===== */
