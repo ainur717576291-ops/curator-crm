@@ -693,6 +693,10 @@ function renderList() {
     }).join('');
     const days = getDaysSinceContact(s);
     const noContactFlag = s.status==='active' && (days===null||days>=NO_CONTACT_DAYS) ? `<span class="badge" style="background:var(--red-l);color:var(--red);">⚠️ ${days===null?'Нет созвона':days+'дн.'}</span>` : '';
+    const ofertaOk = mods[10] && mods[10].oferta;
+    const ofertaBadge = ofertaOk
+      ? `<span class="badge" style="background:#DCFCE7;color:#16A34A;">✅ Оферта</span>`
+      : `<span class="badge" style="background:var(--red-l);color:var(--red);">❌ Оферта</span>`;
     const sb = s.status==='frozen'?'<span class="badge badge-frozen">❄️ Заморожен</span>'
       : s.status==='done'?'<span class="badge badge-done">✅ Завершил</span>'
       : `<span class="badge badge-active">${prog.completed}/8 модулей</span>`;
@@ -701,7 +705,7 @@ function renderList() {
       <div class="sc-avatar" style="${s.status==='frozen'?'background:#DBEAFE;color:#1D4ED8':''}">${s.status==='frozen'?'❄️':initials}</div>
       <div class="sc-body">
         <div class="sc-name">${s.name||'—'}</div>
-        <div class="sc-sub">${sb}${noContactFlag}<span>${tariffTxt}</span>${s.curator?`<span>👤 ${s.curator}</span>`:''}</div>
+        <div class="sc-sub">${sb}${noContactFlag}${ofertaBadge}<span>${tariffTxt}</span>${s.curator?`<span>👤 ${s.curator}</span>`:''}</div>
         <div class="sc-progress">${dots}</div>
       </div>
       <div class="sc-arr">›</div>
