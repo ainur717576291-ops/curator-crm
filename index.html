@@ -557,7 +557,7 @@ async function saveConfig() {
 async function loadStudents() {
   document.getElementById('studentList').innerHTML = '<div class="loading"><div class="spinner"></div><span>Загрузка...</span></div>';
   try {
-    const data = await sbGet('students', `id=neq.${CONFIG_ID}&order=created_at.asc`);
+    const data = await sbGet('students', `id=neq.${CONFIG_ID}&name=not.like.__sales_*&order=created_at.asc`);
     if (Array.isArray(data)) {
       students = data;
       document.getElementById('lastUpdated').textContent = 'Обновлено ' + new Date().toLocaleTimeString('ru-RU', {hour:'2-digit',minute:'2-digit'});
